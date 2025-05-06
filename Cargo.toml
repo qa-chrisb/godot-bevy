@@ -1,0 +1,15 @@
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["David Chavez <david@dcvz.io>"]
+repository = "https://github.com/dcvz/godot-bevy"
+keywords = ["godot", "game", "engine", "gamedev", "graphics"]
+categories = ["game-engines"]
+license = "MIT OR Apache-2.0"
+
+[workspace]
+members = ["godot-bevy"]
+resolver = "2"
+
+[workspace.dependencies]
+godot-bevy-macros = { version = "0.1.0", path = "godot-bevy-macros" }
