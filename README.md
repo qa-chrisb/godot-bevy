@@ -70,6 +70,7 @@ This library is inspired by and builds upon the work of [bevy_godot](https://git
 | Godot-Bevy | Bevy | Godot-Rust | Godot |
 |------------|------|------------|-------|
 | 0.1.x      | 0.16 | 0.2.4      | 4.2.x |
+| 0.2.x      | 0.16 | 0.2.4      | 4.2.x |
 
 ## License
 
