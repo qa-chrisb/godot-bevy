@@ -5,14 +5,18 @@ use godot::{
 };
 
 #[derive(Debug, Component, Clone)]
-pub struct GodotRef {
+pub struct GodotNodeHandle {
     instance_id: InstanceId,
 }
 
-impl GodotRef {
+impl GodotNodeHandle {
     pub fn get<T: Inherits<Node>>(&mut self) -> Gd<T> {
-        self.try_get()
-            .unwrap_or_else(|| panic!("failed to get godot ref as {}", std::any::type_name::<T>()))
+        self.try_get().unwrap_or_else(|| {
+            panic!(
+                "failed to get godot node handle as {}",
+                std::any::type_name::<T>()
+            )
+        })
     }
 
     /// # SAFETY
@@ -22,7 +26,7 @@ impl GodotRef {
     }
 
     /// # SAFETY
-    /// When using ErasedGodotRef as a Bevy Resource or Component, do not create duplicate references
+    /// When using GodotNodeHandle as a Bevy Resource or Component, do not create duplicate references
     /// to the same instance because Godot is not completely thread-safe.
     ///
     /// TODO
@@ -32,5 +36,13 @@ impl GodotRef {
         Self {
             instance_id: reference.instance_id(),
         }
+    }
+
+    pub fn instance_id(&self) -> InstanceId {
+        self.instance_id
+    }
+
+    pub fn from_instance_id(instance_id: InstanceId) -> Self {
+        Self { instance_id }
     }
 }
