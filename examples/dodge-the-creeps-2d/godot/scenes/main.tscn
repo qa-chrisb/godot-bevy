@@ -1,6 +1,21 @@
-[gd_scene format=3 uid="uid://crt73ja5heco1"]
+[gd_scene load_steps=3 format=3 uid="uid://crt73ja5heco1"]
+
+[ext_resource type="PackedScene" uid="uid://j07jashye105" path="res://scenes/hud.tscn" id="1_o5qli"]
+
+[sub_resource type="Curve2D" id="Curve2D_o5qli"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 480, 0, 0, 0, 0, 0, 480, 720, 0, 0, 0, 0, 0, 720, 0, 0, 0, 0, 0, 0)
+}
+point_count = 5
 
 [node name="Main" type="Node"]
 
 [node name="StartPosition" type="Marker2D" parent="."]
 position = Vector2(240, 450)
+
+[node name="MobPath" type="Path2D" parent="."]
+curve = SubResource("Curve2D_o5qli")
+
+[node name="MobSpawnLocation" type="PathFollow2D" parent="MobPath"]
+
+[node name="HUD" parent="." instance=ExtResource("1_o5qli")]

@@ -15,6 +15,9 @@ pub use scene_tree::*;
 pub mod transforms;
 pub use transforms::{Transform2D, Transform3D};
 
+pub mod signals;
+pub use signals::*;
+
 pub struct GodotCorePlugin;
 
 impl Plugin for GodotCorePlugin {
@@ -26,8 +29,8 @@ impl Plugin for GodotCorePlugin {
             .add_plugins(bevy::time::TimePlugin)
             .add_plugins(GodotSceneTreePlugin)
             .add_plugins(GodotTransformsPlugin)
-            .add_plugins(GodotCollisionsPlugin);
-        // .add_plugins(GodotSignalsPlugin)
+            .add_plugins(GodotCollisionsPlugin)
+            .add_plugins(GodotSignalsPlugin);
         // .add_plugins(GodotInputEventPlugin)
     }
 }
@@ -91,5 +94,18 @@ impl<'w, 's> SystemDeltaTimer<'w, 's> {
 
     pub fn delta_seconds_f64(&mut self) -> f64 {
         self.delta().as_secs_f64()
+    }
+}
+
+pub trait FindEntityByNameExt<T> {
+    fn find_entity_by_name(self, name: &str) -> Option<T>;
+}
+
+impl<'a, T: 'a, U> FindEntityByNameExt<T> for U
+where
+    U: Iterator<Item = (&'a Name, T)>,
+{
+    fn find_entity_by_name(mut self, name: &str) -> Option<T> {
+        self.find_map(|(ent_name, t)| (ent_name.as_str() == name).then_some(t))
     }
 }
