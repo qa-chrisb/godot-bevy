@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use bevy::app::{App, Last, Plugin, PreUpdate};
+use bevy::ecs::change_detection::DetectChanges;
 use bevy::ecs::query::{Added, Changed, Or};
 use bevy::ecs::system::Query;
 use bevy::math::Vec3;
@@ -243,6 +244,11 @@ fn pre_update_godot_transforms_2d(
     mut entities: Query<(&mut Transform2D, &mut GodotNodeHandle)>,
 ) {
     for (mut transform, mut reference) in entities.iter_mut() {
+        // Skip entities that were changed recently (e.g., by PhysicsUpdate systems)
+        if transform.is_changed() {
+            continue;
+        }
+
         let obj = reference.get::<Node2D>();
 
         let mut obj_transform = GodotTransform2D::IDENTITY.translated(obj.get_position());
