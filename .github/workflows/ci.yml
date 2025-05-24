@@ -1,0 +1,137 @@
+name: ci
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+  GODOT_VERSION: "4.4"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: build / rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [blaze/compute/ubuntu-latest, blaze/macos-latest, windows-latest]
+        include:
+          - os: blaze/compute/ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            extension: .so
+          - os: blaze/macos-latest
+            target: x86_64-apple-darwin
+            extension: .dylib
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            extension: .dll
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
+        components: rustfmt, clippy
+
+    - name: Install Linux dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev libudev-dev pkg-config
+
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+    - name: Run clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run tests
+      run: cargo test
+
+    - name: Build release
+      run: |
+        cargo build --release
+        cargo build --release --manifest-path examples/dodge-the-creeps-2d/rust/Cargo.toml
+
+    - name: Upload Rust libraries
+      uses: actions/upload-artifact@v4
+      with:
+        name: rust-libs-${{ runner.os }}
+        path: |
+          target/release/*rust${{ matrix.extension }}
+          target/release/deps/*rust*${{ matrix.extension }}
+        if-no-files-found: error
+
+  godot-export:
+    name: export / examples
+    runs-on: blaze/macos-latest
+    needs: rust
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Godot
+      uses: CapsCollective/godot-actions/install-godot@v1.2
+      with:
+        godot-version: ${{ env.GODOT_VERSION }}
+        install-templates: true
+      id: install-godot
+
+    - name: Download Rust libraries
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Setup cross-platform libraries
+      run: |
+        mkdir -p target/{release,debug}
+        
+        # Copy all platform libraries to target directories
+        find artifacts/ -name "*rust*" -type f | while read file; do
+          cp "$file" target/release/ 2>/dev/null || true
+          cp "$file" target/debug/ 2>/dev/null || true
+        done
+        
+        echo "Available libraries:"
+        ls -la target/release/ || echo "No release libraries found"
+
+    - name: Import Godot project
+      working-directory: examples/dodge-the-creeps-2d/godot
+      run: ${{ steps.install-godot.outputs.godot-executable }} --editor --headless --quit || true
+
+    - name: Export for all platforms
+      working-directory: examples/dodge-the-creeps-2d/godot
+      run: |
+        mkdir -p exports
+        
+        ${{ steps.install-godot.outputs.godot-executable }} --headless --export-release "Linux/X11" exports/dodge-the-creeps-2d-linux
+        ${{ steps.install-godot.outputs.godot-executable }} --headless --export-release "Windows Desktop" exports/dodge-the-creeps-2d-windows.exe
+        ${{ steps.install-godot.outputs.godot-executable }} --headless --export-release "macOS" exports/dodge-the-creeps-2d-macos.app
+
+    - name: Upload game exports
+      uses: actions/upload-artifact@v4
+      with:
+        name: game-exports
+        path: examples/dodge-the-creeps-2d/godot/exports/
+        if-no-files-found: error
