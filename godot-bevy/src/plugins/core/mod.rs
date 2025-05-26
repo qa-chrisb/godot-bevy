@@ -18,6 +18,9 @@ pub use transforms::{Transform2D, Transform3D};
 pub mod signals;
 pub use signals::*;
 
+pub mod input_event;
+pub use input_event::*;
+
 /// Schedule that runs during Godot's physics_process at physics frame rate.
 /// Use this for movement, physics, and systems that need to sync with Godot's physics timing.
 #[derive(ScheduleLabel, Clone, Debug, PartialEq, Eq, Hash)]
@@ -35,7 +38,8 @@ impl Plugin for GodotCorePlugin {
             .add_plugins(GodotSceneTreePlugin)
             .add_plugins(GodotTransformsPlugin)
             .add_plugins(GodotCollisionsPlugin)
-            .add_plugins(GodotSignalsPlugin);
+            .add_plugins(GodotSignalsPlugin)
+            .add_plugins(GodotInputEventPlugin);
 
         // Add the PhysicsUpdate schedule
         app.add_schedule(Schedule::new(PhysicsUpdate));
