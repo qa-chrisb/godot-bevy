@@ -36,7 +36,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-godot-bevy = "0.3.0"
+godot-bevy = "0.4.0"
 bevy = { version = "0.16", default-features = false }
 godot = "0.2.4"
 ```
@@ -126,7 +126,7 @@ This library is inspired by and builds upon the work of [bevy_godot](https://git
 
 | `godot-bevy` | Bevy | Godot-Rust | Godot |
 |------------|------|------------|-------|
-| 0.3.x      | 0.16 | 0.2.4      | 4.2.x |
+| 0.4.x      | 0.16 | 0.2.4      | 4.2.x |
 
 ## License
 
