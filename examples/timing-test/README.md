@@ -51,7 +51,14 @@ app.add_systems(PhysicsUpdate, godot_movement_system);
 ## Running This Example
 
 1. **Build**: `cargo build`
-2. **Run**: Open the Godot project and run the scene
+2. **Run**: You can either:
+    1. Open the Godot project and run the scene
+    1. Run: `cargo run`. NOTE: This requires the Godot binary, which we attempt
+       to locate either through your environment's path or by searching common
+       locations. If this doesn't work, update your path to include Godot. If
+       this fails for other reasons, it may be because your version of Godot
+       is different than the one the example was built with, in that case,
+       try opening the Godot project first.
 3. **Observe**: Watch the console output for timing patterns
 
 ## Understanding the Output
@@ -71,7 +78,7 @@ This example is particularly useful for:
 
 **No Strong Ordering Guarantees**: `PhysicsUpdate` and the visual frame schedules (`First`, `PreUpdate`, `Update`, etc.) run independently. A physics frame might execute:
 - Before a visual frame starts
-- Between `PreUpdate` and `Update` 
+- Between `PreUpdate` and `Update`
 - After `Last` completes
 - Multiple times between visual frames (if physics rate > visual rate)
 

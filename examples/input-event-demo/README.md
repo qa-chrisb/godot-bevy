@@ -71,7 +71,14 @@ Works with Godot's input map system - users can remap controls!
 ## Running This Example
 
 1. **Build**: `cargo build`
-2. **Run**: Open the Godot project and run the scene
+2. **Run**: You can either:
+    1. Open the Godot project and run the scene
+    1. Run: `cargo run`. NOTE: This requires the Godot binary, which we attempt
+       to locate either through your environment's path or by searching common
+       locations. If this doesn't work, update your path to include Godot. If
+       this fails for other reasons, it may be because your version of Godot
+       is different than the one the example was built with, in that case,
+       try opening the Godot project first.
 3. **Interact**: Try different input methods:
    - Press keys on your keyboard (Space, Escape, Enter)
    - Click mouse buttons and move the mouse
