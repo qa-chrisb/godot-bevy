@@ -1,4 +1,4 @@
-use bevy::app::{App, Plugin};
+use bevy::app::{App, Plugin, ScheduleRunnerPlugin};
 use bevy::ecs::schedule::{Schedule, ScheduleLabel};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -30,11 +30,9 @@ pub struct GodotCorePlugin;
 
 impl Plugin for GodotCorePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(TaskPoolPlugin::default())
+        app.add_plugins(MinimalPlugins.build().disable::<ScheduleRunnerPlugin>())
             .add_plugins(bevy::log::LogPlugin::default())
-            .add_plugins(bevy::diagnostic::FrameCountPlugin)
             .add_plugins(bevy::diagnostic::DiagnosticsPlugin)
-            .add_plugins(bevy::time::TimePlugin)
             .add_plugins(GodotSceneTreePlugin)
             .add_plugins(GodotTransformsPlugin)
             .add_plugins(GodotCollisionsPlugin)
@@ -43,8 +41,6 @@ impl Plugin for GodotCorePlugin {
 
         // Add the PhysicsUpdate schedule
         app.add_schedule(Schedule::new(PhysicsUpdate));
-
-        // .add_plugins(GodotInputEventPlugin)
     }
 }
 
