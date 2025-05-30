@@ -101,6 +101,7 @@ fn move_player(
         }
     }
 }
+```
 
 ### Node Queries
 
