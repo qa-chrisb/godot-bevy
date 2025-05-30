@@ -1,38 +1,24 @@
 use bevy::prelude::*;
 
+use bevy_asset_loader::asset_collection::AssetCollection;
 use godot::{
     builtin::{StringName, Vector2},
-    classes::{AnimatedSprite2D, Input, Node2D, ResourceLoader},
+    classes::{AnimatedSprite2D, Input, Node2D},
 };
 use godot_bevy::prelude::*;
 
 use crate::{nodes::player::Player as GodotPlayerNode, GameState};
 
-#[derive(Debug, Resource)]
+#[derive(AssetCollection, Resource, Debug)]
 pub struct PlayerAssets {
-    player_scn: GodotResourceHandle,
+    #[asset(path = "scenes/player.tscn")]
+    player_scene: Handle<GodotResource>,
 }
-
-#[derive(Debug, Default, Resource)]
-struct PlayerSpawned(bool);
-
-impl Default for PlayerAssets {
-    fn default() -> Self {
-        let mut resource_loader = ResourceLoader::singleton();
-        let player_scn =
-            GodotResourceHandle::new(resource_loader.load("scenes/player.tscn").unwrap());
-
-        Self { player_scn }
-    }
-}
-
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<PlayerAssets>()
-            .init_resource::<PlayerSpawned>()
-            .add_systems(OnEnter(GameState::MainMenu), spawn_player)
+        app.add_systems(OnExit(GameState::Loading), spawn_player)
             .add_systems(Update, player_on_ready)
             .add_systems(
                 Update,
@@ -58,21 +44,11 @@ pub struct Player {
 #[derive(Debug, Component)]
 struct PlayerInitialized;
 
-fn spawn_player(
-    mut commands: Commands,
-    assets: Res<PlayerAssets>,
-    mut player_spawned: ResMut<PlayerSpawned>,
-    existing_player: Query<Entity, With<Player>>,
-) {
-    // Only spawn if we haven't already spawned a player
-    if !player_spawned.0 && existing_player.is_empty() {
-        commands
-            .spawn_empty()
-            .insert(GodotScene::from_resource(assets.player_scn.clone()))
-            .insert(Player { speed: 0.0 });
-
-        player_spawned.0 = true;
-    }
+fn spawn_player(mut commands: Commands, assets: Res<PlayerAssets>) {
+    commands
+        .spawn_empty()
+        .insert(GodotScene::from_handle(assets.player_scene.clone()))
+        .insert(Player { speed: 0.0 });
 }
 
 fn player_on_ready(

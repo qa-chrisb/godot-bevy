@@ -12,8 +12,8 @@ path = "../../run_godot.rs"
 name = "dodge_the_creeps"
 
 [dependencies]
-bevy = { version = "0.16", default-features = false }
-bevy_kira_audio = { version = "0.23.0", features = ["ogg", "wav"] }
+bevy = { version = "0.16.0", default-features = false }
+bevy_asset_loader = "0.23.0"
 fastrand = { version = "2.3.0" }
 godot = "0.2.4"
 godot-bevy = { path = "../../../godot-bevy" }
