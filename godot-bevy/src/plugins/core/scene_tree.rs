@@ -22,8 +22,10 @@ use godot::{
 
 use crate::{
     bridge::GodotNodeHandle,
-    prelude::{CollisionEventType, Collisions, Transform2D, Transform3D},
+    prelude::{Collisions, Transform2D, Transform3D},
 };
+
+use super::collisions::ALL_COLLISION_SIGNALS;
 
 pub struct GodotSceneTreePlugin;
 
@@ -182,11 +184,6 @@ fn create_scene_tree_entity(
         .map(|(reference, ent)| (reference.instance_id(), ent))
         .collect::<HashMap<_, _>>();
     let scene_root = scene_tree.get().get_root().unwrap();
-    let collision_watcher = scene_tree
-        .get()
-        .get_root()
-        .unwrap()
-        .get_node_as::<Node>("/root/BevyAppSingleton/CollisionWatcher");
 
     for event in events.into_iter() {
         trace!(target: "godot_scene_tree_events", event = ?event);
@@ -217,26 +214,35 @@ fn create_scene_tree_entity(
 
                 let mut node = node.get::<Node>();
 
-                if node.has_signal("body_entered") {
-                    debug!(target: "godot_scene_tree_collisions", body_id = node.instance_id().to_string(), "has body_entered signal");
+                // Check for any collision-related signals and connect them
+                let has_collision_signals = ALL_COLLISION_SIGNALS
+                    .iter()
+                    .any(|&signal| node.has_signal(signal));
+
+                if has_collision_signals {
+                    debug!(target: "godot_scene_tree_collisions", 
+                           node_id = node.instance_id().to_string(), 
+                           "has collision signals");
+
+                    let signal_watcher = scene_tree
+                        .get()
+                        .get_root()
+                        .unwrap()
+                        .get_node_as::<Node>("/root/BevyAppSingleton/SignalWatcher");
 
                     let node_clone = node.clone();
 
-                    node.connect(
-                        "body_entered",
-                        &collision_watcher.callable("collision_event").bind(&[
-                            node_clone.to_variant(),
-                            CollisionEventType::Started.to_variant(),
-                        ]),
-                    );
-
-                    node.connect(
-                        "body_exited",
-                        &collision_watcher.callable("collision_event").bind(&[
-                            node_clone.to_variant(),
-                            CollisionEventType::Ended.to_variant(),
-                        ]),
-                    );
+                    // Connect all available collision signals
+                    for &signal_name in ALL_COLLISION_SIGNALS {
+                        if node.has_signal(signal_name) {
+                            node.connect(
+                                signal_name,
+                                &signal_watcher
+                                    .callable("collision_event")
+                                    .bind(&[node_clone.to_variant(), signal_name.to_variant()]),
+                            );
+                        }
+                    }
 
                     ent.insert(Collisions::default());
                 }

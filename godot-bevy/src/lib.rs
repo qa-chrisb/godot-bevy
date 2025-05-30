@@ -17,10 +17,14 @@ pub mod prelude {
             SoundSettings,
         },
         core::{
-            ActionInput, CollisionEventReader, CollisionEventType, Collisions, FindEntityByNameExt,
-            GodotCorePlugin, GodotSignal, Groups, KeyboardInput, MouseButtonInput, MouseMotion,
-            PhysicsUpdate, SceneTreeEventReader, SceneTreeRef, SystemDeltaTimer, Transform2D,
-            Transform3D, connect_godot_signal,
+            ActionInput, Collisions, FindEntityByNameExt, GodotCorePlugin, GodotSignal, Groups,
+            KeyboardInput, MouseButtonInput, MouseMotion, PhysicsUpdate, SceneTreeEventReader,
+            SceneTreeRef, SystemDeltaTimer, Transform2D, Transform3D,
+            collisions::{
+                ALL_COLLISION_SIGNALS, AREA_ENTERED, AREA_EXITED, BODY_ENTERED, BODY_EXITED,
+                COLLISION_END_SIGNALS, COLLISION_START_SIGNALS,
+            },
+            connect_godot_signal,
         },
         packed_scene::{GodotScene, PackedScenePlugin},
     };
