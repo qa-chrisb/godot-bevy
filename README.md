@@ -226,33 +226,51 @@ fn use_loaded_assets(
 
 ### Audio System
 
-The library provides a convenient audio API using Godot's audio engine
+The library provides a powerful channel-based audio API using Godot's audio engine with spatial audio support.
 
 #### Quick Start
 
-**AssetCollection Loading** (recommended):
 ```rust
-#[derive(AssetCollection, Resource)]
-struct GameAudio {
-    #[asset(path = "audio/background.ogg")]
-    background_music: Handle<GodotResource>,
-    #[asset(path = "audio/gameover.wav")]
-    death_sound: Handle<GodotResource>,
+use bevy::prelude::*;
+use godot_bevy::prelude::*;
+
+// Define audio channels for organization
+#[derive(Resource)]
+struct Music;
+impl AudioChannelMarker for Music {
+    const CHANNEL_NAME: &'static str = "music";
 }
 
-// Add to your loading state
-app.add_loading_state(
-    LoadingState::new(GameState::Loading)
-        .continue_to_state(GameState::Menu)
-        .load_collection::<GameAudio>()
-);
-```
+#[derive(Resource)]
+struct SoundEffects;
+impl AudioChannelMarker for SoundEffects {
+    const CHANNEL_NAME: &'static str = "sfx";
+}
 
-**Direct AssetServer Loading**:
-```rust
-fn load_audio_on_demand(asset_server: Res<AssetServer>) {
-    let music: Handle<GodotResource> = asset_server.load("audio/battle.ogg");
-    // Store handle somewhere for later use
+fn setup_audio(mut app: ResMut<App>) {
+    app.add_audio_channel::<Music>()
+       .add_audio_channel::<SoundEffects>();
+}
+
+fn play_audio(
+    music: Res<AudioChannel<Music>>,
+    sfx: Res<AudioChannel<SoundEffects>>,
+    asset_server: Res<AssetServer>,
+) {
+    // Play background music with fade-in
+    music.play(asset_server.load("audio/background.ogg"))
+         .volume(0.8)
+         .looped()
+         .fade_in(std::time::Duration::from_secs(2));
+
+    // Play 2D positional sound effect  
+    sfx.play_2d(asset_server.load("audio/explosion.wav"), Vec2::new(100.0, 50.0))
+       .volume(0.6)
+       .pitch(1.2);
+
+    // Channel-wide controls
+    music.set_volume(0.5); // Fade all music
+    sfx.stop(); // Stop all sound effects
 }
 ```
 
