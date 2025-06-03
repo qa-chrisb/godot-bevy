@@ -71,6 +71,10 @@ bevy = { version = "0.16.0", default-features = false }
 godot = "0.2.4"
 ```
 
+### Godot Setup
+**Add a `BevyAppSingleton` autoload** in your Godot project settings, which is a Godot scene containing a single root node of type BevyApp, which you can see examples of in `examples/` - this is the entry point for our systems.
+
+
 ### Basic Usage
 
 ```rust
