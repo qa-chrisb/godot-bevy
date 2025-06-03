@@ -2,6 +2,7 @@
 
 `godot-bevy` is a Rust library that brings [Bevy's](https://bevyengine.org/) powerful Entity Component System (ECS) to the versatile [Godot Game Engine](https://godotengine.org/). Use Bevy's ergonomic and high-performance Rust ECS within your Godot projects to get the best of both worlds.
 
+[![Discord](https://img.shields.io/discord/1379465862800736258.svg?color=7289da&&logo=discord)](https://discord.gg/gqkeBsH93H)
 [![Current Crates.io Version](https://img.shields.io/crates/v/godot-bevy.svg)](https://crates.io/crates/godot-bevy)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue)](https://docs.rs/godot-bevy/latest/godot_bevy/)
 [![Test Status](https://github.com/dcvz/godot-bevy/actions/workflows/ci.yml/badge.svg)](https://github.com/dcvz/godot-bevy/actions/workflows/ci.yml)
@@ -305,17 +306,22 @@ The `examples/` directory contains complete sample projects demonstrating differ
 
 Each example includes both Rust code and a complete Godot project ready to run.
 
-## Inspiration and Acknowledgements
-
-This library is inspired by and builds upon the work of [bevy_godot](https://github.com/rand0m-cloud/bevy_godot), which provided similar functionality for Godot 3. `godot-bevy` extends this concept to support Godot 4 and Bevy 0.16.
-
-**Alternative**: If you're looking for a different approach to `godot-bevy`, check out [bevy_godot4](https://github.com/jrockett6/bevy_godot4). For a comparison of the differences between these libraries, see [Issue #2](https://github.com/dcvz/godot-bevy/issues/2).
-
 ## Version Compatibility Matrix
 
 | `godot-bevy` | Bevy | Godot-Rust | Godot |
 |------------|------|------------|-------|
 | 0.6.x      | 0.16 | 0.2.4      | 4.2.x |
+
+## Community
+
+If you are excited about the project or want to contribute, don't hesitate to join our [Discord](https://discord.gg/gqkeBsH93H)!
+We try to be as welcoming as possible to everybody from any background. We're still building this out, but you can ask your questions there!
+
+## Inspiration and Acknowledgements
+
+This library is inspired by and builds upon the work of [bevy_godot](https://github.com/rand0m-cloud/bevy_godot), which provided similar functionality for Godot 3. `godot-bevy` extends this concept to support Godot 4 and Bevy 0.16.
+
+**Alternative**: If you're looking for a different approach to `godot-bevy`, check out [bevy_godot4](https://github.com/jrockett6/bevy_godot4). For a comparison of the differences between these libraries, see [Issue #2](https://github.com/dcvz/godot-bevy/issues/2).
 
 ## MSRV
 
