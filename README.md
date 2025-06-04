@@ -67,7 +67,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-godot-bevy = "0.6.0"
+godot-bevy = "0.6.1"
 bevy = { version = "0.16", default-features = false }
 godot = "0.3.0"
 ```
@@ -310,7 +310,7 @@ Each example includes both Rust code and a complete Godot project ready to run.
 
 | `godot-bevy` | Bevy | Godot-Rust | Godot |
 |------------|------|------------|-------|
-| 0.6.x      | 0.16 | 0.3.0      | 4.2.x |
+| 0.6.x      | 0.16 | 0.3.0      | 4.4.x |
 
 ## Community
 
