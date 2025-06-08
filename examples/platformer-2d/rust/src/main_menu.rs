@@ -1,4 +1,3 @@
-use bevy::prelude::DetectChanges;
 use bevy::{
     app::prelude::*,
     ecs::{
@@ -27,6 +26,7 @@ pub struct MenuAssets {
     pub fullscreen_button: Option<GodotNodeHandle>,
     pub quit_button: Option<GodotNodeHandle>,
     pub initialized: bool,
+    pub signals_connected: bool,
 }
 
 pub struct MainMenuPlugin;
@@ -38,7 +38,7 @@ impl Plugin for MainMenuPlugin {
                 Update,
                 (
                     init_menu_assets.run_if(menu_not_initialized),
-                    connect_buttons.run_if(menu_just_initialized),
+                    connect_buttons.run_if(menu_initialized_but_signals_not_connected),
                     listen_for_button_press.run_if(menu_is_initialized),
                 )
                     .run_if(in_state(GameState::MainMenu)),
@@ -63,6 +63,7 @@ fn reset_menu_assets(mut menu_assets: ResMut<MenuAssets>) {
     menu_assets.fullscreen_button = None;
     menu_assets.quit_button = None;
     menu_assets.initialized = false;
+    menu_assets.signals_connected = false;
 }
 
 fn init_menu_assets(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTreeRef) {
@@ -90,8 +91,8 @@ fn menu_not_initialized(menu_assets: Res<MenuAssets>) -> bool {
     !menu_assets.initialized
 }
 
-fn menu_just_initialized(menu_assets: Res<MenuAssets>) -> bool {
-    menu_assets.initialized && menu_assets.is_changed()
+fn menu_initialized_but_signals_not_connected(menu_assets: Res<MenuAssets>) -> bool {
+    menu_assets.initialized && !menu_assets.signals_connected
 }
 
 fn menu_is_initialized(menu_assets: Res<MenuAssets>) -> bool {
@@ -103,6 +104,7 @@ fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTre
     if menu_assets.start_button.is_some()
         && menu_assets.fullscreen_button.is_some()
         && menu_assets.quit_button.is_some()
+        && !menu_assets.signals_connected
     {
         // Get mutable references one at a time to avoid multiple borrows
         if let Some(start_btn) = menu_assets.start_button.as_mut() {
@@ -115,6 +117,7 @@ fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTre
             connect_godot_signal(quit_btn, "pressed", &mut scene_tree);
         }
 
+        menu_assets.signals_connected = true;
         info!("MainMenu: Connected button signals");
     }
 }
