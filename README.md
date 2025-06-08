@@ -67,7 +67,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-godot-bevy = "0.6.1"
+godot-bevy = "0.6.2"
 bevy = { version = "0.16", default-features = false }
 godot = "0.3.0"
 ```
