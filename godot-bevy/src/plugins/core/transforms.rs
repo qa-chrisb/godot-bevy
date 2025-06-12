@@ -5,6 +5,7 @@ use bevy::ecs::change_detection::DetectChanges;
 use bevy::ecs::query::{Added, Changed, Or};
 use bevy::ecs::system::Query;
 use bevy::math::Vec3;
+use bevy::prelude::Res;
 use bevy::prelude::Transform as BevyTransform;
 use bevy::{ecs::component::Component, math::Quat};
 use godot::builtin::Transform2D as GodotTransform2D;
@@ -320,20 +321,29 @@ pub struct GodotTransformsPlugin;
 
 impl Plugin for GodotTransformsPlugin {
     fn build(&self, app: &mut App) {
+        // Always add writing systems
         app.add_systems(Last, post_update_godot_transforms_3d)
-            .add_systems(PreUpdate, pre_update_godot_transforms_3d)
-            .add_systems(Last, post_update_godot_transforms_2d)
+            .add_systems(Last, post_update_godot_transforms_2d);
+
+        // Always add reading systems, but they'll check the config at runtime
+        app.add_systems(PreUpdate, pre_update_godot_transforms_3d)
             .add_systems(PreUpdate, pre_update_godot_transforms_2d);
     }
 }
 
 fn post_update_godot_transforms_3d(
+    config: Res<super::GodotTransformConfig>,
     _scene_tree: SceneTreeRef,
     mut entities: Query<
         (&Transform3D, &mut GodotNodeHandle),
         Or<(Added<Transform3D>, Changed<Transform3D>)>,
     >,
 ) {
+    // Early return if transform syncing is disabled
+    if config.sync_mode == super::TransformSyncMode::Disabled {
+        return;
+    }
+
     for (transform, mut reference) in entities.iter_mut() {
         let mut obj = reference.get::<Node3D>();
 
@@ -344,9 +354,15 @@ fn post_update_godot_transforms_3d(
 }
 
 fn pre_update_godot_transforms_3d(
+    config: Res<super::GodotTransformConfig>,
     _scene_tree: SceneTreeRef,
     mut entities: Query<(&mut Transform3D, &mut GodotNodeHandle)>,
 ) {
+    // Early return if not using two-way sync
+    if config.sync_mode != super::TransformSyncMode::TwoWay {
+        return;
+    }
+
     for (mut transform, mut reference) in entities.iter_mut() {
         // Skip entities that were changed recently (e.g., by PhysicsUpdate systems)
         if transform.is_changed() {
@@ -361,12 +377,18 @@ fn pre_update_godot_transforms_3d(
 }
 
 fn post_update_godot_transforms_2d(
+    config: Res<super::GodotTransformConfig>,
     _scene_tree: SceneTreeRef,
     mut entities: Query<
         (&Transform2D, &mut GodotNodeHandle),
         Or<(Added<Transform2D>, Changed<Transform2D>)>,
     >,
 ) {
+    // Early return if transform syncing is disabled
+    if config.sync_mode == super::TransformSyncMode::Disabled {
+        return;
+    }
+
     for (transform, mut reference) in entities.iter_mut() {
         let mut obj = reference.get::<Node2D>();
 
@@ -381,9 +403,15 @@ fn post_update_godot_transforms_2d(
 }
 
 fn pre_update_godot_transforms_2d(
+    config: Res<super::GodotTransformConfig>,
     _scene_tree: SceneTreeRef,
     mut entities: Query<(&mut Transform2D, &mut GodotNodeHandle)>,
 ) {
+    // Early return if not using two-way sync
+    if config.sync_mode != super::TransformSyncMode::TwoWay {
+        return;
+    }
+
     for (mut transform, mut reference) in entities.iter_mut() {
         // Skip entities that were changed recently (e.g., by PhysicsUpdate systems)
         if transform.is_changed() {
