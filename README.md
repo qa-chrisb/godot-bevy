@@ -97,30 +97,24 @@ Check out the [examples](./examples) directory:
 - **[Dodge the Creeps](./examples/dodge-the-creeps-2d)** - Classic arcade game
 - **[Simple Movement](./examples/simple-node2d-movement)** - Basic transform usage
 
+## ✨ Inspiration and Acknowledgements
+
+This library is inspired by and builds upon the work of [bevy_godot](https://github.com/rand0m-cloud/bevy_godot), which provided similar functionality for Godot 3. `godot-bevy` extends this concept to support Godot 4 and Bevy 0.16.
+
+**Alternative**: If you're looking for a different approach to `godot-bevy`, check out [bevy_godot4](https://github.com/jrockett6/bevy_godot4). For a comparison of the differences between these libraries, see [Issue #2](https://github.com/dcvz/godot-bevy/issues/2).
+
+## 🦀 MSRV
+
+The minimum supported Rust version is 1.87.0.
+
+The MSRV is the minimum Rust version that can be used to compile each crate.
+
+## 📕 License 
+
+godot-bevy is distributed under the terms of both the MIT license and the Apache License (Version 2.0).
+See [LICENSE-APACHE](./LICENSE-APACHE) and [LICENSE-MIT](./LICENSE-MIT) for details. Opening a pull
+request is assumed to signal agreement with these licensing terms.
+
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
-
-### Development Setup
-
-1. Fork and clone the repository
-2. Install Rust 1.87+ and Godot 4.3
-3. Run tests: `cargo test`
-4. Build examples: `cargo build --examples`
-
-## 📄 License
-
-Licensed under either of:
-
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
-- MIT license ([LICENSE-MIT](LICENSE-MIT))
-
-at your option.
-
-## 🙏 Acknowledgments
-
-Special thanks to:
-- The [Bevy](https://bevyengine.org/) team for their amazing ECS
-- The [godot-rust](https://godot-rust.github.io/) team for the Godot bindings
-- [Blaze](https://runblaze.dev) for CI runner support
-- Our [contributors](https://github.com/godot-rust/godot-bevy/graphs/contributors) and community
+Contributions are welcome! Please feel free to submit a Pull Request.
