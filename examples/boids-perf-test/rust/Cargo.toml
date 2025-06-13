@@ -1,5 +1,5 @@
 [package]
-name = "rust"
+name = "rustboids"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.82"
@@ -9,12 +9,12 @@ crate-type = ["cdylib"]
 
 [[bin]]
 path = "../../run_godot.rs"
-name = "dodge_the_creeps"
+name = "boids-benchmark"
 
 [dependencies]
 bevy = { version = "0.16", default-features = false }
-bevy_asset_loader = "0.23.0"
-fastrand = { version = "2.3.0" }
+bevy_spatial = "0.11.0"
+fastrand = "2.3.0"
 godot = "0.3"
 godot-bevy = { path = "../../../godot-bevy" }
 which = "7.0.3"
