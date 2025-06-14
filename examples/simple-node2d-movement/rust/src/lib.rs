@@ -7,7 +7,7 @@ use godot::classes::Sprite2D;
 use godot::global::godot_print;
 use godot_bevy::prelude::godot_prelude::gdextension;
 use godot_bevy::prelude::godot_prelude::ExtensionLibrary;
-use godot_bevy::prelude::{bevy_app, GodotNodeHandle, Transform2D};
+use godot_bevy::prelude::{bevy_app, GodotNodeHandle, Sprite2DMarker, Transform2D};
 use std::f32::consts::PI;
 
 // The build_app function runs at your game's startup.
@@ -67,24 +67,26 @@ fn orbit_setup(
 
     // Gather all Godot nodes without the `NodeInitialized` component.
     // Also, include the Bevy entity identifier so we can add components to it.
-    mut uninitialized: Query<(Entity, &mut GodotNodeHandle), Without<NodeInitialized>>,
+    mut uninitialized: Query<
+        (Entity, &mut GodotNodeHandle, &Sprite2DMarker),
+        Without<NodeInitialized>,
+    >,
 ) {
-    for (entity, mut node_handle) in uninitialized.iter_mut() {
-        if let Some(sprite_node) = node_handle.try_get::<Sprite2D>() {
-            // The GodotNodeHandle allows us to call Godot methods such as `get_name()`.
-            godot_print!(
-                "Initializing node: {:?}",
-                sprite_node.get_name().to_string()
-            );
-            // Attach new components to the entity.
-            commands
-                .entity(entity)
-                .insert(InitialPosition {
-                    pos: sprite_node.get_transform().origin,
-                })
-                .insert(Orbiter { angle: 0.0 })
-                .insert(NodeInitialized);
-        }
+    for (entity, mut node_handle, _) in uninitialized.iter_mut() {
+        let sprite_node = node_handle.get::<Sprite2D>();
+        // The GodotNodeHandle allows us to call Godot methods such as `get_name()`.
+        godot_print!(
+            "Initializing node: {:?}",
+            sprite_node.get_name().to_string()
+        );
+        // Attach new components to the entity.
+        commands
+            .entity(entity)
+            .insert(InitialPosition {
+                pos: sprite_node.get_transform().origin,
+            })
+            .insert(Orbiter { angle: 0.0 })
+            .insert(NodeInitialized);
     }
 }
 

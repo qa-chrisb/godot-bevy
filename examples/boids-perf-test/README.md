@@ -66,8 +66,8 @@ The benchmark tracks:
 |------------|------------------|-------------------|-------------|
 | 100        | ~120 FPS          | ~120 FPS           | Minimal     |
 | 500        | ~120 FPS          | ~120 FPS           | Minimal        |
-| 1000       | ~68 FPS          | ~113 FPS           | 1.6x        |
-| **2000**   | **~29 FPS**      | **~57 FPS**       | **1.9x**    |
+| 1000       | ~68 FPS          | ~120 FPS           | 1.76x        |
+| **2000**   | **~29 FPS**      | **~88 FPS**       | **3x**    |
 
 > **Note**: Actual results measured on M1 MacBook Pro. The **Rust implementation is 13.4x faster** in pure algorithm execution (0.38ms vs 22.4ms force calculation), with the remaining time spent on transform synchronization and rendering.
 
