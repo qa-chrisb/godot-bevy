@@ -43,7 +43,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-godot-bevy = "0.6.2"
+godot-bevy = "0.7.0"
 bevy = { version = "0.16", default-features = false }
 godot = "0.3"
 ```
@@ -104,6 +104,12 @@ Check out the [examples](./examples) directory:
 This library is inspired by and builds upon the work of [bevy_godot](https://github.com/rand0m-cloud/bevy_godot), which provided similar functionality for Godot 3. `godot-bevy` extends this concept to support Godot 4 and Bevy 0.16.
 
 **Alternative**: If you're looking for a different approach to `godot-bevy`, check out [bevy_godot4](https://github.com/jrockett6/bevy_godot4). For a comparison of the differences between these libraries, see [Issue #2](https://github.com/dcvz/godot-bevy/issues/2).
+
+## ⊹ Version Compatibility Matrix
+
+| `godot-bevy` | Bevy | Godot-Rust | Godot |
+|------------|------|------------|-------|
+| 0.7.x      | 0.16 | 0.3      | 4.4.x |
 
 ## 🦀 MSRV
 
