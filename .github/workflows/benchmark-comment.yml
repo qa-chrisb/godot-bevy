@@ -37,12 +37,15 @@ jobs:
             exit 0
           fi
           
-          if [ -f "benchmark-results/pr_number.txt" ]; then
+          # Check for PR metadata in benchmark-artifacts subdirectory
+          if [ -f "benchmark-results/benchmark-artifacts/pr_number.txt" ]; then
             echo "is_pr=true" >> $GITHUB_OUTPUT
-            echo "pr_number=$(cat benchmark-results/pr_number.txt)" >> $GITHUB_OUTPUT
-            echo "pr_sha=$(cat benchmark-results/pr_sha.txt)" >> $GITHUB_OUTPUT
+            echo "pr_number=$(cat benchmark-results/benchmark-artifacts/pr_number.txt)" >> $GITHUB_OUTPUT
+            echo "pr_sha=$(cat benchmark-results/benchmark-artifacts/pr_sha.txt)" >> $GITHUB_OUTPUT
+            echo "✅ Found PR metadata for PR #$(cat benchmark-results/benchmark-artifacts/pr_number.txt)"
           else
             echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "📋 No PR metadata found - this was likely a main branch run"
           fi
       
       - name: Comment PR with results
