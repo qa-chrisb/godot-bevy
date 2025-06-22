@@ -1,23 +1,20 @@
 name: benchmark-baseline
 
 on:
-  workflow_dispatch: # Allow manual triggering
-  push:
+  workflow_run:
+    workflows: ["ci"]
+    types:
+      - completed
     branches: [main]
-    paths:
-      - "godot-bevy/**"
-      - "godot-bevy-macros/**"
-      - "examples/boids-perf-test/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
 
 permissions:
   contents: write
 
 jobs:
-  update-baseline:
-    name: Update benchmark baseline
-    runs-on: blaze/compute/ubuntu-latest-amd64
+  commit-baseline:
+    name: Commit benchmark baseline
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
@@ -25,55 +22,59 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Download benchmark artifacts
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: benchmark-results
+          path: benchmark-artifacts/
 
-      - name: Install gdenv
+      - name: Check for baseline file
+        id: check
         run: |
-          curl -fsSL https://gdenv.bytemeadow.com | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          # Check if CI generated a baseline file
+          if [ -f "benchmark-artifacts/examples/boids-perf-test/baseline.json" ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "✅ Found baseline.json in artifacts"
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+            echo "📋 No baseline.json found in artifacts"
+            # Debug: list what's in the artifacts
+            echo "Contents of benchmark-artifacts:"
+            find benchmark-artifacts -type f -name "*.json" || true
+          fi
 
-      - name: Install Godot via gdenv
+      - name: Update baseline
+        if: steps.check.outputs.found == 'true'
         run: |
-          gdenv install 4.4.1
-          gdenv use 4.4.1
-          echo "$HOME/.local/share/gdenv/bin" >> $GITHUB_PATH
-          echo "GODOT_EXECUTABLE=$HOME/.local/share/gdenv/bin/godot" >> $GITHUB_ENV
-          $HOME/.local/share/gdenv/bin/godot --version
-
-      - name: Build Rust libraries
-        run: |
-          # Build main godot-bevy library first
-          cargo build --release
+          # Copy baseline to the correct location
+          cp benchmark-artifacts/examples/boids-perf-test/baseline.json examples/boids-perf-test/baseline.json
           
-          # Build boids benchmark
-          cargo build --release --manifest-path examples/boids-perf-test/rust/Cargo.toml
+          # Add CI metadata
+          jq '. + {"ci_metadata": {"commit": "${{ github.event.workflow_run.head_sha }}", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'", "runner": "GitHub Actions"}}' \
+            examples/boids-perf-test/baseline.json > baseline.tmp.json
+          mv baseline.tmp.json examples/boids-perf-test/baseline.json
 
-      - name: Import Godot project
-        working-directory: examples/boids-perf-test/godot
-        run: $GODOT_EXECUTABLE --editor --headless --quit || true
-
-      - name: Run full benchmark
-        working-directory: examples/boids-perf-test
-        run: |
-          # Run comprehensive benchmark for baseline
-          python3 regression_test.py --boids 500 1000 2000 5000 10000 20000 --duration 10 --godot "$GODOT_EXECUTABLE"
-
-          # Add CI metadata to baseline
-          jq '. + {"ci_metadata": {"commit": "${{ github.sha }}", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'", "runner": "GitHub Actions"}}' baseline.json > baseline.tmp.json
-          mv baseline.tmp.json baseline.json
-
-      - name: Commit and push baseline
+      - name: Commit and push
+        if: steps.check.outputs.found == 'true'
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
           git add examples/boids-perf-test/baseline.json
-          git commit -m "chore: update benchmark baseline from CI [skip ci]
+          
+          # Check if there are changes to commit
+          if git diff --cached --quiet; then
+            echo "📋 No changes to baseline.json"
+          else
+            git commit -m "chore: update benchmark baseline from CI [skip ci]
 
-          Updated baseline from commit: ${{ github.sha }}
-          Runner: GitHub Actions (blaze/compute/ubuntu-latest-amd64)
+          Updated baseline from commit: ${{ github.event.workflow_run.head_sha }}
+          Runner: GitHub Actions
 
           This ensures all benchmarks are compared against a consistent baseline from the same hardware."
 
-          git push origin main
+            git push origin main
+            echo "✅ Pushed updated baseline to main"
+          fi

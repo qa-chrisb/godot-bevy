@@ -261,12 +261,24 @@ jobs:
         id: benchmark
         working-directory: examples/boids-perf-test
         run: |
-          # Run quick benchmark for CI
-          if python3 regression_test.py --boids 500 1000 2000 5000 10000 20000 --godot "$GODOT_EXECUTABLE"; then
-            echo "benchmark_success=true" >> $GITHUB_OUTPUT
+          # Run benchmark and save baseline if on main branch
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # On main branch, save baseline
+            if python3 regression_test.py --boids 500 1000 2000 5000 10000 20000 --save-baseline baseline.json --godot "$GODOT_EXECUTABLE"; then
+              echo "benchmark_success=true" >> $GITHUB_OUTPUT
+              echo "baseline_created=true" >> $GITHUB_OUTPUT
+            else
+              echo "benchmark_success=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
           else
-            echo "benchmark_success=false" >> $GITHUB_OUTPUT
-            exit 1
+            # On PR, just run benchmark
+            if python3 regression_test.py --boids 500 1000 2000 5000 10000 20000 --godot "$GODOT_EXECUTABLE"; then
+              echo "benchmark_success=true" >> $GITHUB_OUTPUT
+            else
+              echo "benchmark_success=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
           fi
 
       - name: Check for regression
@@ -318,4 +330,5 @@ jobs:
           path: |
             examples/boids-perf-test/benchmark_results/
             examples/boids-perf-test/benchmark_output.txt
+            examples/boids-perf-test/baseline.json
             benchmark-artifacts/
