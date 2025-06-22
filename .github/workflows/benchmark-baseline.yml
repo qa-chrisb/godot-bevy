@@ -62,7 +62,7 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          git add examples/boids-perf-test/baseline.json
+          git add -f examples/boids-perf-test/baseline.json
           
           # Check if there are changes to commit
           if git diff --cached --quiet; then
