@@ -1,4 +1,3 @@
-// Boids implementation using Bevy ECS for performance comparison
 use bevy::{
     ecs::{
         component::Component,
