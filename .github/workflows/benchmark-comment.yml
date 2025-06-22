@@ -18,6 +18,8 @@ jobs:
     
     steps:
       - name: Download benchmark results
+        id: download
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,6 +30,13 @@ jobs:
       - name: Check if this is a PR with benchmark results
         id: check
         run: |
+          # Check if artifacts were downloaded successfully
+          if [ "${{ steps.download.outcome }}" != "success" ]; then
+            echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "📋 No benchmark artifacts found (CI may not have run benchmarks)"
+            exit 0
+          fi
+          
           if [ -f "benchmark-results/pr_number.txt" ]; then
             echo "is_pr=true" >> $GITHUB_OUTPUT
             echo "pr_number=$(cat benchmark-results/pr_number.txt)" >> $GITHUB_OUTPUT
