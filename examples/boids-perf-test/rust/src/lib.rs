@@ -18,8 +18,5 @@ mod container;
 
 #[bevy_app]
 fn build_app(app: &mut App) {
-    app.add_plugins((
-        BoidsPlugin,
-        // Diagnostics removed for performance
-    ));
+    app.add_plugins((BoidsPlugin,));
 }
