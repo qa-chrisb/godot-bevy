@@ -23,8 +23,8 @@ use godot::{
 use godot_bevy::{
     bridge::GodotNodeHandle,
     prelude::{
-        connect_godot_signal, AudioChannel, FindEntityByNameExt, GodotResource, GodotScene,
-        GodotSignal, NodeTreeView, SceneTreeRef, Transform2D,
+        AudioChannel, FindEntityByNameExt, GodotResource, GodotScene, GodotSignal, GodotSignals,
+        NodeTreeView, Transform2D,
     },
 };
 use std::f32::consts::PI;
@@ -113,9 +113,9 @@ pub struct MobNodes {
 
 fn new_mob(
     mut entities: Query<(&Mob, &Transform2D, &mut GodotNodeHandle), Added<Mob>>,
-    mut scene_tree: SceneTreeRef,
     sfx_channel: Res<AudioChannel<GameSfxChannel>>,
     assets: Res<MobAssets>,
+    signals: GodotSignals,
 ) {
     for (mob_data, transform, mut mob) in entities.iter_mut() {
         let mut mob = mob.get::<RigidBody2D>();
@@ -136,11 +136,7 @@ fn new_mob(
         let mob_type_index = fastrand::usize(0..mob_types.len());
         animated_sprite.set_animation(mob_types[mob_type_index].arg());
 
-        connect_godot_signal(
-            &mut mob_nodes.visibility_notifier,
-            "screen_exited",
-            &mut scene_tree,
-        );
+        signals.connect(&mut mob_nodes.visibility_notifier, "screen_exited");
 
         // Play 2D positional spawn sound at mob's position with fade-in
         let position = Vec2::new(

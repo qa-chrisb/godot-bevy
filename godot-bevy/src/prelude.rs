@@ -39,6 +39,8 @@ pub use crate::plugins::{
         FindEntityByNameExt,
         GodotCorePlugin,
         GodotSignal,
+        GodotSignalArgument,
+        GodotSignals,
         GodotTransformConfig,
         Groups,
         KeyboardInput,

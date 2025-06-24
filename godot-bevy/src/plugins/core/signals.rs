@@ -3,14 +3,16 @@ use bevy::{
     ecs::{
         event::{Event, EventWriter, event_update_system},
         schedule::IntoScheduleConfigs,
-        system::NonSendMut,
+        system::{NonSendMut, SystemParam},
     },
 };
-use godot::{classes::Node, meta::ToGodot};
+use godot::{
+    classes::Node,
+    prelude::{Callable, Variant},
+};
+use std::sync::mpsc::Sender;
 
 use crate::bridge::GodotNodeHandle;
-
-use super::SceneTreeRef;
 
 pub struct GodotSignalsPlugin;
 
@@ -21,15 +23,38 @@ impl Plugin for GodotSignalsPlugin {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct GodotSignalArgument {
+    pub type_name: String,
+    pub value: String,
+}
+
 #[derive(Debug, Event)]
 pub struct GodotSignal {
     pub name: String,
     pub origin: GodotNodeHandle,
     pub target: GodotNodeHandle,
+    pub arguments: Vec<GodotSignalArgument>,
 }
 
 #[doc(hidden)]
 pub struct GodotSignalReader(pub std::sync::mpsc::Receiver<GodotSignal>);
+
+#[doc(hidden)]
+pub struct GodotSignalSender(pub std::sync::mpsc::Sender<GodotSignal>);
+
+/// Clean API for connecting Godot signals - hides implementation details from users
+#[derive(SystemParam)]
+pub struct GodotSignals<'w> {
+    signal_sender: NonSendMut<'w, GodotSignalSender>,
+}
+
+impl<'w> GodotSignals<'w> {
+    /// Connect a Godot signal to be forwarded to Bevy's event system
+    pub fn connect(&self, node: &mut GodotNodeHandle, signal_name: &str) {
+        connect_godot_signal(node, signal_name, self.signal_sender.0.clone());
+    }
+}
 
 fn write_godot_signal_events(
     events: NonSendMut<GodotSignalReader>,
@@ -41,23 +66,55 @@ fn write_godot_signal_events(
 pub fn connect_godot_signal(
     node: &mut GodotNodeHandle,
     signal_name: &str,
-    scene_tree: &mut SceneTreeRef,
+    signal_sender: Sender<GodotSignal>,
 ) {
     let mut node = node.get::<Node>();
-    let signal_watcher = scene_tree
-        .get()
-        .get_root()
-        .unwrap()
-        .get_node_as::<Node>("/root/BevyAppSingleton/SignalWatcher");
-
     let node_clone = node.clone();
+    let signal_name_copy = signal_name.to_string();
+    let node_id = node_clone.instance_id();
 
-    node.connect(
-        signal_name,
-        &signal_watcher.callable("event").bind(&[
-            signal_watcher.to_variant(),
-            node_clone.to_variant(),
-            signal_name.to_variant(),
-        ]),
-    );
+    // TRULY UNIVERSAL closure that handles ANY number of arguments
+    let closure = move |args: &[&Variant]| -> Result<Variant, ()> {
+        // Use captured sender directly - no global state needed!
+        let arguments: Vec<GodotSignalArgument> = args
+            .iter()
+            .map(|&arg| variant_to_signal_argument(arg))
+            .collect();
+
+        let origin_handle = GodotNodeHandle::from_instance_id(node_id);
+
+        let _ = signal_sender.send(GodotSignal {
+            name: signal_name_copy.clone(),
+            origin: origin_handle.clone(),
+            target: origin_handle,
+            arguments,
+        });
+
+        Ok(Variant::nil())
+    };
+
+    // Create callable from our universal closure
+    let callable = Callable::from_local_fn("universal_signal_handler", closure);
+
+    // Connect the signal - this will work with ANY number of arguments!
+    node.connect(signal_name, &callable);
+}
+
+pub fn variant_to_signal_argument(variant: &Variant) -> GodotSignalArgument {
+    let type_name = match variant.get_type() {
+        godot::prelude::VariantType::NIL => "Nil",
+        godot::prelude::VariantType::BOOL => "Bool",
+        godot::prelude::VariantType::INT => "Int",
+        godot::prelude::VariantType::FLOAT => "Float",
+        godot::prelude::VariantType::STRING => "String",
+        godot::prelude::VariantType::VECTOR2 => "Vector2",
+        godot::prelude::VariantType::VECTOR3 => "Vector3",
+        godot::prelude::VariantType::OBJECT => "Object",
+        _ => "Unknown",
+    }
+    .to_string();
+
+    let value = variant.stringify().to_string();
+
+    GodotSignalArgument { type_name, value }
 }

@@ -88,6 +88,7 @@ pub fn initialize_scene_tree(
     mut scene_tree: SceneTreeRef,
     mut entities: Query<(&mut GodotNodeHandle, Entity)>,
     config: Res<GodotTransformConfig>,
+    signal_sender: NonSendMut<super::signals::GodotSignalSender>,
 ) {
     fn traverse(node: Gd<Node>, events: &mut Vec<SceneTreeEvent>) {
         events.push(SceneTreeEvent {
@@ -110,6 +111,7 @@ pub fn initialize_scene_tree(
         &mut scene_tree,
         &mut entities,
         &config,
+        &signal_sender.0,
     );
 }
 
@@ -357,6 +359,7 @@ fn create_scene_tree_entity(
     scene_tree: &mut SceneTreeRef,
     entities: &mut Query<(&mut GodotNodeHandle, Entity)>,
     config: &GodotTransformConfig,
+    signal_sender: &std::sync::mpsc::Sender<super::signals::GodotSignal>,
 ) {
     let mut ent_mapping = entities
         .iter()
@@ -396,7 +399,7 @@ fn create_scene_tree_entity(
                     }
                 }
 
-                let mut node = node.get::<Node>();
+                let node = node.get::<Node>();
 
                 // Check for any collision-related signals and connect them
                 let has_collision_signals = ALL_COLLISION_SIGNALS
@@ -408,22 +411,15 @@ fn create_scene_tree_entity(
                            node_id = node.instance_id().to_string(), 
                            "has collision signals");
 
-                    let signal_watcher = scene_tree
-                        .get()
-                        .get_root()
-                        .unwrap()
-                        .get_node_as::<Node>("/root/BevyAppSingleton/SignalWatcher");
-
-                    let node_clone = node.clone();
-
-                    // Connect all available collision signals
+                    // Connect all available collision signals using the universal handler
                     for &signal_name in ALL_COLLISION_SIGNALS {
                         if node.has_signal(signal_name) {
-                            node.connect(
+                            let mut node_handle =
+                                GodotNodeHandle::from_instance_id(node.instance_id());
+                            super::signals::connect_godot_signal(
+                                &mut node_handle,
                                 signal_name,
-                                &signal_watcher
-                                    .callable("collision_event")
-                                    .bind(&[node_clone.to_variant(), signal_name.to_variant()]),
+                                signal_sender.clone(),
                             );
                         }
                     }
@@ -473,6 +469,7 @@ fn read_scene_tree_events(
     mut event_reader: EventReader<SceneTreeEvent>,
     mut entities: Query<(&mut GodotNodeHandle, Entity)>,
     config: Res<GodotTransformConfig>,
+    signal_sender: NonSendMut<super::signals::GodotSignalSender>,
 ) {
     create_scene_tree_entity(
         &mut commands,
@@ -480,5 +477,6 @@ fn read_scene_tree_events(
         &mut scene_tree,
         &mut entities,
         &config,
+        &signal_sender.0,
     );
 }

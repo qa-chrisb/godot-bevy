@@ -4,10 +4,11 @@ use std::sync::{Mutex, mpsc::channel};
 
 use crate::watchers::input_watcher::GodotInputWatcher;
 use crate::watchers::scene_tree_watcher::SceneTreeWatcher;
-use crate::watchers::signal_watcher::GodotSignalWatcher;
 use crate::{
     GodotPlugin,
-    plugins::core::{GodotSignalReader, InputEventReader, PhysicsDelta, PhysicsUpdate},
+    plugins::core::{
+        GodotSignalReader, GodotSignalSender, InputEventReader, PhysicsDelta, PhysicsUpdate,
+    },
     prelude::*,
 };
 
@@ -42,12 +43,11 @@ impl BevyApp {
         app.insert_non_send_resource(SceneTreeEventReader(receiver));
     }
 
-    fn register_signal_watcher(&mut self, app: &mut App) {
+    fn register_signal_system(&mut self, app: &mut App) {
         let (sender, receiver) = channel();
-        let mut signal_watcher = GodotSignalWatcher::new_alloc();
-        signal_watcher.bind_mut().notification_channel = Some(sender);
-        signal_watcher.set_name("SignalWatcher");
-        self.base_mut().add_child(&signal_watcher);
+        // Create channel for Godot signals and insert as resources
+        // Signals are connected directly using closures in the signals module
+        app.insert_non_send_resource(GodotSignalSender(sender));
         app.insert_non_send_resource(GodotSignalReader(receiver));
     }
 
@@ -81,7 +81,7 @@ impl INode for BevyApp {
         (BEVY_INIT_FUNC.lock().unwrap().as_mut().unwrap())(&mut app);
 
         self.register_scene_tree_watcher(&mut app);
-        self.register_signal_watcher(&mut app);
+        self.register_signal_system(&mut app);
         self.register_input_event_watcher(&mut app);
         app.init_resource::<PhysicsDelta>();
         self.app = Some(app);

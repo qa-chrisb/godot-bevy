@@ -99,7 +99,7 @@ fn menu_is_initialized(menu_assets: Res<MenuAssets>) -> bool {
     menu_assets.initialized
 }
 
-fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTreeRef) {
+fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, signals: GodotSignals) {
     // Check if all buttons are available first
     if menu_assets.start_button.is_some()
         && menu_assets.fullscreen_button.is_some()
@@ -108,13 +108,13 @@ fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTre
     {
         // Get mutable references one at a time to avoid multiple borrows
         if let Some(start_btn) = menu_assets.start_button.as_mut() {
-            connect_godot_signal(start_btn, "pressed", &mut scene_tree);
+            signals.connect(start_btn, "pressed");
         }
         if let Some(fullscreen_btn) = menu_assets.fullscreen_button.as_mut() {
-            connect_godot_signal(fullscreen_btn, "pressed", &mut scene_tree);
+            signals.connect(fullscreen_btn, "pressed");
         }
         if let Some(quit_btn) = menu_assets.quit_button.as_mut() {
-            connect_godot_signal(quit_btn, "pressed", &mut scene_tree);
+            signals.connect(quit_btn, "pressed");
         }
 
         menu_assets.signals_connected = true;

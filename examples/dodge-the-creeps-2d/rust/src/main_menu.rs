@@ -9,7 +9,7 @@ use bevy::{
 use godot::classes::Button;
 use godot_bevy::{
     bridge::GodotNodeHandle,
-    prelude::{connect_godot_signal, GodotSignal, NodeTreeView, SceneTreeRef},
+    prelude::{GodotSignal, GodotSignals, NodeTreeView, SceneTreeRef},
 };
 
 use crate::GameState;
@@ -60,12 +60,8 @@ fn init_menu_assets(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTr
     menu_assets.score_label = Some(menu_ui.score_label.clone());
 }
 
-fn connect_start_button(mut menu_assets: ResMut<MenuAssets>, mut scene_tree: SceneTreeRef) {
-    connect_godot_signal(
-        menu_assets.start_button.as_mut().unwrap(),
-        "pressed",
-        &mut scene_tree,
-    );
+fn connect_start_button(mut menu_assets: ResMut<MenuAssets>, signals: GodotSignals) {
+    signals.connect(menu_assets.start_button.as_mut().unwrap(), "pressed");
 }
 
 fn listen_for_start_button(
