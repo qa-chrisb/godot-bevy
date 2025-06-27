@@ -1,5 +1,10 @@
-use std::{collections::HashMap, marker::PhantomData};
-
+use super::collisions::ALL_COLLISION_SIGNALS;
+use super::node_markers::*;
+use super::{GodotTransformConfig, TransformSyncMode};
+use crate::prelude::godot_main_thread;
+use crate::prelude::{Transform2D, Transform3D};
+use crate::{bridge::GodotNodeHandle, prelude::Collisions};
+use bevy::ecs::system::Res;
 use bevy::{
     app::{App, First, Plugin, PreStartup},
     ecs::{
@@ -27,18 +32,8 @@ use godot::{
     obj::{Gd, Inherits},
     prelude::GodotConvert,
 };
-
-use crate::{
-    bridge::GodotNodeHandle,
-    prelude::{Collisions, Transform2D, Transform3D},
-};
-
-use super::node_markers::*;
-use bevy::ecs::system::Res;
-
-use super::{GodotTransformConfig, TransformSyncMode};
-
-use super::collisions::ALL_COLLISION_SIGNALS;
+use std::collections::HashMap;
+use std::marker::PhantomData;
 
 pub struct GodotSceneTreePlugin;
 
@@ -83,6 +78,7 @@ impl Default for SceneTreeRefImpl {
     }
 }
 
+#[godot_main_thread]
 pub fn initialize_scene_tree(
     mut commands: Commands,
     mut scene_tree: SceneTreeRef,
@@ -129,6 +125,7 @@ pub enum SceneTreeEventType {
     NodeRenamed,
 }
 
+#[godot_main_thread]
 fn connect_scene_tree(mut scene_tree: SceneTreeRef) {
     let mut scene_tree_gd = scene_tree.get();
 
@@ -407,8 +404,8 @@ fn create_scene_tree_entity(
                     .any(|&signal| node.has_signal(signal));
 
                 if has_collision_signals {
-                    debug!(target: "godot_scene_tree_collisions", 
-                           node_id = node.instance_id().to_string(), 
+                    debug!(target: "godot_scene_tree_collisions",
+                           node_id = node.instance_id().to_string(),
                            "has collision signals");
 
                     // Connect all available collision signals using the universal handler
@@ -463,6 +460,7 @@ fn create_scene_tree_entity(
     }
 }
 
+#[godot_main_thread]
 fn read_scene_tree_events(
     mut commands: Commands,
     mut scene_tree: SceneTreeRef,

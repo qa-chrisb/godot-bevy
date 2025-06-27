@@ -81,22 +81,6 @@ impl Default for BoidsConfig {
     }
 }
 
-/// Resource for performance tracking
-#[derive(Resource)]
-pub struct PerformanceTracker {
-    pub frame_count: u32,
-    pub last_log_time: f32,
-}
-
-impl Default for PerformanceTracker {
-    fn default() -> Self {
-        Self {
-            frame_count: 0,
-            last_log_time: 0.0,
-        }
-    }
-}
-
 /// Plugin for boids simulation
 pub struct BoidsPlugin;
 
@@ -116,7 +100,6 @@ impl Plugin for BoidsPlugin {
         .init_resource::<BoidsConfig>()
         .init_resource::<SimulationState>()
         .init_resource::<BoidCount>()
-        .init_resource::<PerformanceTracker>()
         .add_systems(Startup, load_assets)
         // Game logic systems
         .add_systems(
@@ -124,9 +107,8 @@ impl Plugin for BoidsPlugin {
             (
                 sync_container_params,
                 handle_boid_count,
-                update_simulation_state,
+                stop_simulation,
                 colorize_new_boids,
-                log_performance,
             )
                 .chain(),
         )
@@ -152,6 +134,7 @@ fn load_assets(mut commands: Commands, server: Res<AssetServer>) {
 }
 
 /// Synchronize parameters from the container to Bevy resources
+#[godot_main_thread]
 fn sync_container_params(
     mut boid_count: ResMut<BoidCount>,
     mut config: ResMut<BoidsConfig>,
@@ -193,14 +176,14 @@ fn handle_boid_count(
     config: Res<BoidsConfig>,
     boid_scene: Res<BoidScene>,
 ) {
-    // Count current boids
-    let current_count = boids.iter().count() as i32;
-    boid_count.current = current_count;
-
     // Skip spawning/despawning if simulation isn't running
     if !simulation_state.is_running {
         return;
     }
+
+    // Count current boids
+    let current_count = boids.iter().count() as i32;
+    boid_count.current = current_count;
 
     let target_count = boid_count.target;
 
@@ -276,7 +259,8 @@ fn despawn_boids(
 }
 
 /// Update simulation state and manage cleanup on stop
-fn update_simulation_state(
+#[godot_main_thread]
+fn stop_simulation(
     simulation_state: Res<SimulationState>,
     mut commands: Commands,
     boids: Query<(Entity, &GodotNodeHandle), With<Boid>>,
@@ -295,6 +279,7 @@ fn update_simulation_state(
 }
 
 /// Colorize newly spawned boids (matches GDScript behavior)
+#[godot_main_thread]
 fn colorize_new_boids(
     mut commands: Commands,
     new_boids: Query<(Entity, &GodotNodeHandle), With<NeedsColorization>>,
@@ -345,8 +330,10 @@ fn sync_transforms(mut query: Query<(&Transform2D, &mut Transform), With<Boid>>)
             *vanilla_transform = *encapsulated_transform.as_bevy()
         });
 }
-
 // system to calculate/store neighborhood forces
+// NOTE: While this doesn't _need_ to be on the main thread, we see a
+// significant performance impact (75 -> 53 fps drop) when not on main
+#[godot_main_thread]
 fn boids_calculate_neighborhood_forces(
     spatial_tree: Res<BoidTree>,
     all_boids: Query<(&Transform, &Velocity), With<Boid>>,
@@ -378,9 +365,7 @@ fn boids_apply_forces(
     >,
     time: Res<Time>,
     config: Res<BoidsConfig>,
-    mut performance: ResMut<PerformanceTracker>,
 ) {
-    performance.frame_count += 1;
     let delta = time.delta_secs();
 
     boid_transform_query
@@ -560,26 +545,4 @@ fn apply_boundary_constraints(pos: Vec2, config: &BoidsConfig) -> Vec2 {
             pos.y
         },
     )
-}
-
-/// Log performance metrics
-fn log_performance(
-    mut performance: ResMut<PerformanceTracker>,
-    time: Res<Time>,
-    _boids: Query<&Transform2D, With<Boid>>,
-) {
-    let current_time = time.elapsed_secs();
-    if current_time - performance.last_log_time >= 1.0 {
-        // Performance logging disabled for accurate benchmarking
-        // let fps = performance.frame_count as f32 / (current_time - performance.last_log_time);
-        // let actual_boid_count = boids.iter().count();
-        // godot_print!(
-        //     "🎮 Bevy Boids: {} boids | FPS: {:.1}",
-        //     actual_boid_count,
-        //     fps
-        // );
-
-        performance.last_log_time = current_time;
-        performance.frame_count = 0;
-    }
 }

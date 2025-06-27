@@ -14,8 +14,9 @@ use godot::classes::{Node2D, Node3D};
 use godot::prelude::Transform3D as GodotTransform3D;
 
 use crate::bridge::GodotNodeHandle;
+use crate::prelude::godot_main_thread;
 
-use super::{Node2DMarker, Node3DMarker, SceneTreeRef};
+use super::{Node2DMarker, Node3DMarker};
 
 #[derive(Debug, Component, Default, Copy, Clone)]
 pub struct Transform3D {
@@ -331,9 +332,9 @@ impl Plugin for GodotTransformsPlugin {
     }
 }
 
+#[godot_main_thread]
 fn post_update_godot_transforms_3d(
     config: Res<super::GodotTransformConfig>,
-    _scene_tree: SceneTreeRef,
     mut entities: Query<
         (&Transform3D, &mut GodotNodeHandle),
         (
@@ -356,9 +357,9 @@ fn post_update_godot_transforms_3d(
     }
 }
 
+#[godot_main_thread]
 fn pre_update_godot_transforms_3d(
     config: Res<super::GodotTransformConfig>,
-    _scene_tree: SceneTreeRef,
     mut entities: Query<(&mut Transform3D, &mut GodotNodeHandle), With<Node3DMarker>>,
 ) {
     // Early return if not using two-way sync
@@ -379,9 +380,9 @@ fn pre_update_godot_transforms_3d(
     }
 }
 
+#[godot_main_thread]
 fn post_update_godot_transforms_2d(
     config: Res<super::GodotTransformConfig>,
-    _scene_tree: SceneTreeRef,
     mut entities: Query<
         (&Transform2D, &mut GodotNodeHandle),
         (
@@ -408,9 +409,9 @@ fn post_update_godot_transforms_2d(
     }
 }
 
+#[godot_main_thread]
 fn pre_update_godot_transforms_2d(
     config: Res<super::GodotTransformConfig>,
-    _scene_tree: SceneTreeRef,
     mut entities: Query<(&mut Transform2D, &mut GodotNodeHandle), With<Node2DMarker>>,
 ) {
     // Early return if not using two-way sync

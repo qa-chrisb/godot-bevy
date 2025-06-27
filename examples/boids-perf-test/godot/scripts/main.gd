@@ -45,9 +45,6 @@ func _ready():
 	# Set up performance tracking
 	reset_performance_metrics()
 
-	# Initialize Bevy benchmark interface (commented out for now)
-	# _initialize_bevy_interface()
-
 	print("🎮 Boids Performance Benchmark Ready!")
 	print("   - Switch between Godot (GDScript) and godot-bevy (Rust + ECS)")
 	print("   - Adjust boid count to test performance limits")
@@ -224,8 +221,3 @@ func print_performance_summary():
 	print("   Max FPS: %.1f" % summary.max_fps)
 	print("   Duration: %.1f seconds" % summary.duration_seconds)
 	print("   Samples: %d" % summary.sample_count)
-
-func _initialize_bevy_interface():
-	# Try to create the Bevy benchmark interface (not implemented yet)
-	print("⚠️ BoidsBenchmark class not found - Bevy implementation unavailable")
-	print("   (This will be available once the Rust extension is properly integrated)")

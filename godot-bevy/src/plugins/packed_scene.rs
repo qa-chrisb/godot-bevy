@@ -1,5 +1,7 @@
-use std::str::FromStr;
-
+use super::core::{SceneTreeRef, Transform2D, Transform3D};
+use crate::bridge::GodotNodeHandle;
+use crate::plugins::assets::GodotResource;
+use crate::prelude::godot_main_thread;
 use bevy::{
     app::{App, Plugin, PostUpdate},
     asset::{Assets, Handle},
@@ -15,11 +17,7 @@ use godot::{
     builtin::GString,
     classes::{Node, Node2D, Node3D, PackedScene, ResourceLoader},
 };
-
-use crate::bridge::GodotNodeHandle;
-use crate::plugins::assets::GodotResource;
-
-use super::core::{SceneTreeRef, Transform2D, Transform3D};
+use std::str::FromStr;
 
 pub struct PackedScenePlugin;
 impl Plugin for PackedScenePlugin {
@@ -71,6 +69,7 @@ impl GodotScene {
 #[derive(Component, Debug, Default)]
 struct GodotSceneSpawned;
 
+#[godot_main_thread]
 fn spawn_scene(
     mut commands: Commands,
     mut new_scenes: Query<

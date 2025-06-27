@@ -67,6 +67,7 @@ impl Plugin for HudPlugin {
 /// System to set up HUD handles and update displays when a new level is loaded
 ///
 /// Simplified approach that still reduces SceneTreeRef conflicts by batching operations.
+#[godot_main_thread]
 fn setup_hud_on_level_loaded(
     mut hud_handles: ResMut<HudHandles>,
     mut events: EventReader<LevelLoadedEvent>,
@@ -111,6 +112,7 @@ fn generate_hud_update_events(
 ///
 /// This system can run in parallel with other incremental update systems
 /// since it only responds to events and updates UI elements.
+#[godot_main_thread]
 fn handle_hud_update_events(
     mut hud_events: EventReader<HudUpdateEvent>,
     hud_handles: Res<HudHandles>,
@@ -122,7 +124,7 @@ fn handle_hud_update_events(
                     let mut label_handle = gems_label.clone();
                     label_handle
                         .get::<Label>()
-                        .set_text(&format!("Gems: {}", gem_count));
+                        .set_text(&format!("Gems: {gem_count}"));
                 }
             }
         }

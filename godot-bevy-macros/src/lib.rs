@@ -7,6 +7,36 @@ use syn::{
     Data, DeriveInput, Error, Field, Fields, Ident, LitStr, Result, Token, parse_macro_input,
 };
 
+/// Attribute macro that ensures a system runs on the main thread by adding a NonSend<MainThreadMarker> parameter.
+/// This is required for systems that need to access Godot APIs.
+#[proc_macro_attribute]
+pub fn godot_main_thread(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mut input_fn = parse_macro_input!(item as syn::ItemFn);
+    let fn_name = &input_fn.sig.ident;
+
+    // Create a unique type alias name for this function
+    let type_alias_name = syn::Ident::new(
+        &format!("__GodotMainThreadMarker_{fn_name}"),
+        fn_name.span(),
+    );
+
+    // Add a NonSend resource parameter that forces main thread execution
+    let main_thread_param: syn::FnArg = syn::parse_quote! {
+        _main_thread: bevy::ecs::system::NonSend<#type_alias_name>
+    };
+    input_fn.sig.inputs.push(main_thread_param);
+
+    // Return the modified function with a unique type alias
+    let expanded = quote! {
+        #[allow(non_camel_case_types)]
+        type #type_alias_name = godot_bevy::plugins::core::MainThreadMarker;
+
+        #input_fn
+    };
+
+    expanded.into()
+}
+
 #[proc_macro_attribute]
 pub fn bevy_app(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn = parse_macro_input!(item as syn::ItemFn);
@@ -199,8 +229,9 @@ fn create_pattern_matching_expr(
         quote_spanned! { span =>
             {
                 let base_node = &node;
-                let node_ref = godot_bevy::node_tree_view::find_node_by_pattern(base_node, #path_pattern)
-                    .expect(&format!("Could not find node matching pattern: {}", #path_pattern));
+                let pattern = #path_pattern;
+                let node_ref = godot_bevy::node_tree_view::find_node_by_pattern(base_node, pattern)
+                    .unwrap_or_else(|| panic!("Could not find node matching pattern: {pattern}"));
                 godot_bevy::bridge::GodotNodeHandle::new(node_ref)
             }
         }
@@ -282,7 +313,7 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
     let attr_args: BevyBundleAttr = bevy_attr.parse_args()?;
 
     // Auto-generate bundle name from struct name
-    let bundle_name = syn::Ident::new(&format!("{}Bundle", struct_name), struct_name.span());
+    let bundle_name = syn::Ident::new(&format!("{struct_name}Bundle"), struct_name.span());
 
     // Generate bundle struct
     let bundle_fields: Vec<_> = attr_args
@@ -290,7 +321,7 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
         .iter()
         .map(|spec| {
             let component_name = &spec.component_name;
-            let field_name = format!("{}", component_name).to_lowercase();
+            let field_name = format!("{component_name}").to_lowercase();
             let field_ident = syn::Ident::new(&field_name, component_name.span());
             quote! {
                 pub #field_ident: #component_name
@@ -311,7 +342,7 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
         .iter()
         .map(|spec| {
             let component_name = &spec.component_name;
-            let field_name = format!("{}", component_name).to_lowercase();
+            let field_name = format!("{component_name}").to_lowercase();
             let field_ident = syn::Ident::new(&field_name, component_name.span());
 
             if let Some(source_field) = &spec.source_field {
@@ -342,8 +373,9 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
     let _first_component = &attr_args.components[0].component_name;
 
     // Generate the bundle creation function
+    let bundle_name_lower = bundle_name.to_string().to_lowercase();
     let create_bundle_fn_name = syn::Ident::new(
-        &format!("__create_{}_bundle", bundle_name.to_string().to_lowercase()),
+        &format!("__create_{bundle_name_lower}_bundle"),
         bundle_name.span(),
     );
 
