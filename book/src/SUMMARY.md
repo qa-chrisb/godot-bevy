@@ -35,3 +35,4 @@
 # Migration Guides
 
 - [v0.6 to v0.7](./migration/v0.6-to-v0.7.md)
+- [v0.7 to v0.8](./migration/v0.7-to-v0.8.md)
