@@ -4,7 +4,8 @@ use quote::{quote, quote_spanned};
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{
-    Data, DeriveInput, Error, Field, Fields, Ident, LitStr, Result, Token, parse_macro_input,
+    Data, DeriveInput, Error, Field, Fields, Ident, LitStr, Result, Token, braced,
+    parse_macro_input,
 };
 
 /// Attribute macro that ensures a system runs on the main thread by adding a NonSend<MainThreadMarker> parameter.
@@ -264,7 +265,14 @@ struct BevyBundleAttr {
 
 struct ComponentSpec {
     component_name: Ident,
-    source_field: Option<Ident>,
+    mapping: ComponentMapping,
+}
+
+#[derive(Debug, Clone)]
+enum ComponentMapping {
+    Default,                             // (Component)
+    SingleField(Ident),                  // (Component: field)
+    MultipleFields(Vec<(Ident, Ident)>), // (Component { bevy_field: godot_field })
 }
 
 impl Parse for BevyBundleAttr {
@@ -278,17 +286,42 @@ impl Parse for BevyBundleAttr {
 
             let component_name: Ident = component_content.parse()?;
 
-            // Check if there's a colon and source field mapping
-            let source_field = if component_content.peek(Token![:]) {
+            // Determine the mapping type
+            let mapping = if component_content.peek(Token![:]) {
+                // Single field mapping: (Component: field)
                 let _colon: Token![:] = component_content.parse()?;
-                Some(component_content.parse()?)
+                let field: Ident = component_content.parse()?;
+
+                ComponentMapping::SingleField(field)
+            } else if component_content.peek(syn::token::Brace) {
+                // Multiple field mapping: (Component { bevy_field: godot_field, ... })
+                let field_content;
+                braced!(field_content in component_content);
+
+                let mut field_mappings = Vec::new();
+
+                while !field_content.is_empty() {
+                    let bevy_field: Ident = field_content.parse()?;
+                    let _colon: Token![:] = field_content.parse()?;
+                    let godot_field: Ident = field_content.parse()?;
+
+                    field_mappings.push((bevy_field, godot_field));
+
+                    // Handle optional trailing comma
+                    if field_content.peek(Token![,]) {
+                        let _comma: Token![,] = field_content.parse()?;
+                    }
+                }
+
+                ComponentMapping::MultipleFields(field_mappings)
             } else {
-                None
+                // Default mapping: (Component)
+                ComponentMapping::Default
             };
 
             components.push(ComponentSpec {
                 component_name,
-                source_field,
+                mapping,
             });
 
             if !input.is_empty() {
@@ -311,6 +344,49 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
         .ok_or_else(|| Error::new_spanned(&input, "Missing #[bevy_bundle(...)] attribute"))?;
 
     let attr_args: BevyBundleAttr = bevy_attr.parse_args()?;
+
+    // Get struct fields to check for transform_with attributes
+    let fields = match &input.data {
+        Data::Struct(data) => &data.fields,
+        _ => {
+            return Err(Error::new_spanned(
+                &input,
+                "BevyBundle can only be used on structs",
+            ));
+        }
+    };
+
+    // Helper function to extract transform_with from field attributes
+    let extract_transform_with = |field_name: &Ident| -> Option<syn::Path> {
+        for field in fields {
+            if let Some(fname) = &field.ident {
+                if fname == field_name {
+                    for attr in &field.attrs {
+                        if attr.path().is_ident("bundle") || attr.path().is_ident("bevy_bundle") {
+                            // Parse the bundle attribute
+                            if let Ok(syn::Meta::NameValue(name_value)) =
+                                attr.parse_args::<syn::Meta>()
+                            {
+                                if name_value.path.is_ident("transform_with") {
+                                    if let syn::Expr::Lit(expr_lit) = &name_value.value {
+                                        if let syn::Lit::Str(lit_str) = &expr_lit.lit {
+                                            let transform_str = lit_str.value();
+                                            if let Ok(path) =
+                                                syn::parse_str::<syn::Path>(&transform_str)
+                                            {
+                                                return Some(path);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        None
+    };
 
     // Auto-generate bundle name from struct name
     let bundle_name = syn::Ident::new(&format!("{struct_name}Bundle"), struct_name.span());
@@ -345,15 +421,50 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
             let field_name = format!("{component_name}").to_lowercase();
             let field_ident = syn::Ident::new(&field_name, component_name.span());
 
-            if let Some(source_field) = &spec.source_field {
-                // Component with field mapping
-                quote! {
-                    #field_ident: #component_name(node.bind().#source_field)
+            match &spec.mapping {
+                ComponentMapping::Default => {
+                    // Marker component with no field mapping - use default
+                    quote! {
+                        #field_ident: #component_name::default()
+                    }
                 }
-            } else {
-                // Marker component with no field mapping - use default
-                quote! {
-                    #field_ident: #component_name::default()
+                ComponentMapping::SingleField(source_field) => {
+                    // Component with single field mapping (tuple struct)
+                    // Check if this field has a transform_with attribute
+                    if let Some(transformer) = extract_transform_with(source_field) {
+                        quote! {
+                            #field_ident: #component_name(#transformer(node.bind().#source_field.clone()))
+                        }
+                    } else {
+                        quote! {
+                            #field_ident: #component_name(node.bind().#source_field.clone())
+                        }
+                    }
+                }
+                ComponentMapping::MultipleFields(field_mappings) => {
+                    // Component with multiple field mappings (struct initialization)
+                    let field_inits: Vec<_> = field_mappings
+                        .iter()
+                        .map(|(bevy_field, godot_field)| {
+                            // Check if this field has a transform_with attribute
+                            if let Some(transformer) = extract_transform_with(godot_field) {
+                                quote! {
+                                    #bevy_field: #transformer(node.bind().#godot_field.clone())
+                                }
+                            } else {
+                                quote! {
+                                    #bevy_field: node.bind().#godot_field.clone()
+                                }
+                            }
+                        })
+                        .collect();
+
+                    quote! {
+                        #field_ident: #component_name {
+                            #(#field_inits),*,
+                            ..Default::default()
+                        }
+                    }
                 }
             }
         })
@@ -413,4 +524,132 @@ fn bevy_bundle(input: DeriveInput) -> Result<TokenStream2> {
     };
 
     Ok(expanded)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn test_bevy_bundle_basic_syntax() {
+        let input: DeriveInput = parse_quote! {
+            #[bevy_bundle((TestComponent: test_field))]
+            struct TestNode {
+                test_field: String,
+            }
+        };
+
+        let result = bevy_bundle(input);
+        assert!(result.is_ok(), "Basic syntax should parse successfully");
+    }
+
+    #[test]
+    fn test_bevy_bundle_with_transform() {
+        let input: DeriveInput = parse_quote! {
+            #[bevy_bundle((TestComponent: test_field))]
+            struct TestNode {
+                #[bundle(transform_with = "String::from")]
+                test_field: String,
+            }
+        };
+
+        let result = bevy_bundle(input);
+        assert!(result.is_ok(), "Transform syntax should parse successfully");
+
+        let output = result.unwrap();
+        let output_str = output.to_string();
+
+        // Check that the transformer function is called in the generated code
+        assert!(
+            output_str.contains("String :: from"),
+            "Should contain the transformer function"
+        );
+    }
+
+    #[test]
+    fn test_bevy_bundle_multiple_fields() {
+        let input: DeriveInput = parse_quote! {
+            #[bevy_bundle((TestComponent { name: test_name, value: test_value }))]
+            struct TestNode {
+                #[bundle(transform_with = "String::from")]
+                test_name: String,
+                test_value: i32,
+            }
+        };
+
+        let result = bevy_bundle(input);
+        assert!(
+            result.is_ok(),
+            "Multiple fields syntax should parse successfully"
+        );
+
+        let output = result.unwrap();
+        let output_str = output.to_string();
+
+        // Check that the transformer is only applied to the specified field
+        assert!(
+            output_str.contains("String :: from"),
+            "Should contain the transformer function"
+        );
+        assert!(
+            output_str.contains("test_name"),
+            "Should contain the field name"
+        );
+        assert!(
+            output_str.contains("test_value"),
+            "Should contain the other field"
+        );
+    }
+
+    #[test]
+    fn test_bevy_bundle_default_component() {
+        let input: DeriveInput = parse_quote! {
+            #[bevy_bundle((MarkerComponent))]
+            struct TestNode {
+                test_field: String,
+            }
+        };
+
+        let result = bevy_bundle(input);
+        assert!(
+            result.is_ok(),
+            "Default component syntax should parse successfully"
+        );
+
+        let output = result.unwrap();
+        let output_str = output.to_string();
+
+        // Check that default() is called for marker components
+        assert!(
+            output_str.contains("MarkerComponent :: default ()"),
+            "Should use default for marker components"
+        );
+    }
+
+    #[test]
+    fn test_extract_transform_with_function() {
+        // Test the helper function directly by creating a more complex scenario
+        let input: DeriveInput = parse_quote! {
+            #[bevy_bundle((TestComponent: test_field))]
+            struct TestNode {
+                #[bundle(transform_with = "custom_transformer")]
+                test_field: String,
+                other_field: i32,
+            }
+        };
+
+        let result = bevy_bundle(input);
+        assert!(result.is_ok());
+
+        let output = result.unwrap().to_string();
+        assert!(
+            output.contains("custom_transformer"),
+            "Should call the custom transformer function"
+        );
+        assert!(
+            output.contains("node . bind () . test_field . clone ()"),
+            "Should access the field correctly"
+        );
+    }
 }
