@@ -372,6 +372,11 @@ fn create_scene_tree_entity(
 
         match event.event_type {
             SceneTreeEventType::NodeAdded => {
+                // Skip nodes that have been freed before we process them (can happen in tests)
+                if !node.instance_id().lookup_validity() {
+                    continue;
+                }
+
                 let mut ent = if let Some(ent) = ent {
                     commands.entity(ent)
                 } else {
@@ -433,10 +438,16 @@ fn create_scene_tree_entity(
                 crate::autosync::try_add_bundles_for_node(commands, ent, &event.node);
 
                 if node.instance_id() != scene_root.instance_id() {
-                    let parent = node.get_parent().unwrap().instance_id();
-                    commands
-                        .entity(*ent_mapping.get(&parent).unwrap())
-                        .add_children(&[ent]);
+                    if let Some(parent) = node.get_parent() {
+                        let parent_id = parent.instance_id();
+                        if let Some(&parent_entity) = ent_mapping.get(&parent_id) {
+                            commands.entity(parent_entity).add_children(&[ent]);
+                        } else {
+                            bevy::log::warn!(target: "godot_scene_tree_events", 
+                                "Parent entity with ID {} not found in ent_mapping. This might indicate a missing or incorrect mapping.", 
+                                parent_id);
+                        }
+                    }
                 }
             }
             SceneTreeEventType::NodeRemoved => {
