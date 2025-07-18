@@ -2127,7 +2127,7 @@ dependencies = [
 
 [[package]]
 name = "godot-bevy"
-version = "0.8.2"
+version = "0.8.4"
 dependencies = [
  "bevy",
  "futures-lite",
@@ -2142,7 +2142,7 @@ dependencies = [
 
 [[package]]
 name = "godot-bevy-macros"
-version = "0.8.2"
+version = "0.8.4"
 dependencies = [
  "proc-macro2",
  "quote",
