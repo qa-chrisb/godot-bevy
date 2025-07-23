@@ -14,7 +14,6 @@ use bevy::{
         },
     },
     math::Vec2,
-    prelude::GilrsPlugin,
 };
 
 use crate::plugins::input::events::{
@@ -32,7 +31,6 @@ impl Plugin for BevyInputBridgePlugin {
         // Add the dependency - we need Godot input events to bridge them
         app.add_plugins(super::events::GodotInputEventPlugin)
             .add_plugins(InputPlugin)
-            .add_plugins(GilrsPlugin)
             .add_systems(
                 PreUpdate,
                 (

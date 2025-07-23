@@ -1,10 +1,6 @@
 #![allow(deprecated)] // TODO: remove this once we've removed SystemDeltaTimer
 
 use bevy::app::{App, Plugin, ScheduleRunnerPlugin};
-use bevy::asset::{
-    AssetMetaCheck, AssetPlugin,
-    io::{AssetSource, AssetSourceId},
-};
 use bevy::ecs::schedule::{Schedule, ScheduleLabel};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -43,63 +39,6 @@ impl PhysicsDelta {
 /// Resource marker to ensure systems accessing Godot APIs run on the main thread
 #[derive(Resource, Default)]
 pub struct MainThreadMarker;
-
-/// Transform synchronization modes
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum TransformSyncMode {
-    /// No transform syncing - use direct Godot physics (move_and_slide, etc.)
-    /// Best for: Platformers, physics-heavy games
-    Disabled,
-    /// One-way sync: ECS → Godot only
-    /// Best for: Pure ECS games, simple movement
-    OneWay,
-    /// Two-way sync: ECS ↔ Godot
-    /// Best for: Hybrid apps migrating from GDScript to ECS
-    TwoWay,
-}
-
-impl Default for TransformSyncMode {
-    fn default() -> Self {
-        Self::OneWay
-    }
-}
-
-/// Configuration resource for transform syncing behavior
-#[derive(Resource, Debug, Clone)]
-pub struct GodotTransformConfig {
-    pub sync_mode: TransformSyncMode,
-}
-
-impl Default for GodotTransformConfig {
-    fn default() -> Self {
-        Self {
-            sync_mode: TransformSyncMode::OneWay,
-        }
-    }
-}
-
-impl GodotTransformConfig {
-    /// Disable all transform syncing - use direct Godot physics instead
-    pub fn disabled() -> Self {
-        Self {
-            sync_mode: TransformSyncMode::Disabled,
-        }
-    }
-
-    /// Enable one-way sync (ECS → Godot) - default behavior
-    pub fn one_way() -> Self {
-        Self {
-            sync_mode: TransformSyncMode::OneWay,
-        }
-    }
-
-    /// Enable two-way sync (ECS ↔ Godot) for hybrid apps
-    pub fn two_way() -> Self {
-        Self {
-            sync_mode: TransformSyncMode::TwoWay,
-        }
-    }
-}
 
 use crate::interop::GodotNodeHandle;
 use bevy::ecs::system::EntityCommands;
@@ -223,34 +162,7 @@ pub struct GodotBaseCorePlugin;
 
 impl Plugin for GodotBaseCorePlugin {
     fn build(&self, app: &mut App) {
-        // IMPORTANT: Register custom AssetReader BEFORE setting up AssetPlugin
-        app.register_asset_source(
-            AssetSourceId::Default,
-            AssetSource::build()
-                .with_reader(|| Box::new(crate::plugins::assets::GodotAssetReader::new())),
-        );
-        app.register_asset_source(
-            AssetSourceId::from("res"),
-            AssetSource::build()
-                .with_reader(|| Box::new(crate::plugins::assets::GodotAssetReader::new())),
-        );
-        app.register_asset_source(
-            AssetSourceId::from("user"),
-            AssetSource::build()
-                .with_reader(|| Box::new(crate::plugins::assets::GodotAssetReader::new())),
-        );
-        app.register_asset_source(
-            AssetSourceId::from("uid"),
-            AssetSource::build()
-                .with_reader(|| Box::new(crate::plugins::assets::GodotAssetReader::new())),
-        );
-
         app.add_plugins(MinimalPlugins.build().disable::<ScheduleRunnerPlugin>())
-            // Configure AssetPlugin to bypass path verification for Godot resources
-            .add_plugins(AssetPlugin {
-                meta_check: AssetMetaCheck::Never,
-                ..default()
-            })
             .add_plugins(bevy::log::LogPlugin::default())
             .add_plugins(bevy::diagnostic::DiagnosticsPlugin)
             .init_resource::<PhysicsDelta>()
