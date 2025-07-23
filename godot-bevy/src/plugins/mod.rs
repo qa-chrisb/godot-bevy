@@ -6,6 +6,7 @@ pub mod assets;
 pub mod audio;
 pub mod collisions;
 pub mod core;
+pub mod godot_bevy_logger;
 pub mod input;
 pub mod packed_scene;
 pub mod scene_tree;
@@ -17,6 +18,7 @@ pub use assets::GodotAssetsPlugin;
 pub use audio::GodotAudioPlugin;
 pub use collisions::GodotCollisionsPlugin;
 pub use core::GodotBaseCorePlugin;
+pub use godot_bevy_logger::GodotBevyLogPlugin;
 pub use input::{BevyInputBridgePlugin, GodotInputEventPlugin};
 pub use packed_scene::GodotPackedScenePlugin;
 pub use scene_tree::GodotSceneTreePlugin;
@@ -29,7 +31,7 @@ pub use input::GodotInputEventPlugin as GodotInputPlugin;
 
 plugin_group! {
     /// Minimal core functionality required for Godot-Bevy integration.
-    /// This includes scene tree management and basic bridge components.
+    /// This includes scene tree management
     pub struct GodotCorePlugins {
         :GodotBaseCorePlugin,
         :GodotSceneTreePlugin,
@@ -46,6 +48,8 @@ plugin_group! {
         :GodotAudioPlugin,
         :GodotPackedScenePlugin,
         :GodotTransformSyncPlugin,
+        #[cfg(feature = "godot_bevy_log")]
+        :GodotBevyLogPlugin,
         #[cfg(feature = "bevy_gamepad")]
         :GilrsPlugin,
     }
