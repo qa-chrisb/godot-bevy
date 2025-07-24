@@ -2160,6 +2160,7 @@ dependencies = [
  "parking_lot",
  "paste",
  "thiserror 2.0.12",
+ "tracing",
 ]
 
 [[package]]
@@ -3775,7 +3776,7 @@ dependencies = [
  "fastrand",
  "godot",
  "godot-bevy",
- "which 7.0.3",
+ "which 8.0.0",
 ]
 
 [[package]]
@@ -3836,7 +3837,7 @@ dependencies = [
  "fastrand",
  "godot",
  "godot-bevy",
- "which 7.0.3",
+ "which 8.0.0",
 ]
 
 [[package]]
