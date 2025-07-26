@@ -125,9 +125,7 @@ Check out the [examples](./examples) directory:
 
 ## ✨ Inspiration and Acknowledgements
 
-This library is inspired by and builds upon the work of [bevy_godot](https://github.com/rand0m-cloud/bevy_godot), which provided similar functionality for Godot 3. `godot-bevy` extends this concept to support Godot 4 and Bevy 0.16.
-
-**Alternative**: If you're looking for a different approach to `godot-bevy`, check out [bevy_godot4](https://github.com/jrockett6/bevy_godot4). For a comparison of the differences between these libraries, see [Issue #2](https://github.com/bytemeadow/godot-bevy/issues/2).
+This library was inspired by and originally built upon the work of [bevy_godot](https://github.com/rand0m-cloud/bevy_godot), which provided similar functionality for Godot 3. `godot-bevy` extends this concept to support Godot 4 and Bevy 0.16. It has now diverged quite a bit.
 
 ## ⊹ Version Compatibility Matrix
 
