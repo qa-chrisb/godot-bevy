@@ -1,106 +1,106 @@
 {
   "godot": {
     "500": {
-      "avg_fps": 97.2513743128444,
-      "avg_frame_time_ms": 10.2826310380266,
+      "avg_fps": 98.8406955826514,
+      "avg_frame_time_ms": 10.1172901921131,
       "boid_count": 500,
       "duration": 10.0,
-      "frame_count": 973,
+      "frame_count": 989,
       "implementation": "godot",
       "max_fps": 111.111111111111,
-      "max_frame_time_ms": 11.0,
-      "min_fps": 90.9090909090909,
+      "max_frame_time_ms": 12.0,
+      "min_fps": 83.3333333333333,
       "min_frame_time_ms": 9.0,
       "p50_fps": 100.0,
       "p95_fps": 90.9090909090909,
       "p99_fps": 90.9090909090909,
-      "timestamp": "2025-08-02T06:39:53"
+      "timestamp": "2025-08-02T16:40:35"
     },
     "1000": {
-      "avg_fps": 58.2184941082484,
-      "avg_frame_time_ms": 17.1766723842196,
+      "avg_fps": 57.7422577422578,
+      "avg_frame_time_ms": 17.318339100346,
       "boid_count": 1000,
       "duration": 10.0,
-      "frame_count": 583,
+      "frame_count": 578,
       "implementation": "godot",
       "max_fps": 62.5,
-      "max_frame_time_ms": 19.0,
-      "min_fps": 52.6315789473684,
+      "max_frame_time_ms": 18.0,
+      "min_fps": 55.5555555555556,
       "min_frame_time_ms": 16.0,
       "p50_fps": 58.8235294117647,
       "p95_fps": 55.5555555555556,
       "p99_fps": 55.5555555555556,
-      "timestamp": "2025-08-02T06:40:17"
+      "timestamp": "2025-08-02T16:40:58"
     },
     "2000": {
-      "avg_fps": 32.0199501246883,
-      "avg_frame_time_ms": 31.2305295950156,
+      "avg_fps": 32.2548432194927,
+      "avg_frame_time_ms": 31.0030959752322,
       "boid_count": 2000,
       "duration": 10.0,
-      "frame_count": 321,
+      "frame_count": 323,
       "implementation": "godot",
-      "max_fps": 34.4827586206897,
+      "max_fps": 33.3333333333333,
       "max_frame_time_ms": 33.0,
       "min_fps": 30.3030303030303,
-      "min_frame_time_ms": 29.0,
+      "min_frame_time_ms": 30.0,
       "p50_fps": 32.258064516129,
       "p95_fps": 31.25,
       "p99_fps": 30.3030303030303,
-      "timestamp": "2025-08-02T06:40:41"
+      "timestamp": "2025-08-02T16:41:22"
     },
     "5000": {
-      "avg_fps": 13.4368468199463,
-      "avg_frame_time_ms": 74.4222222222222,
+      "avg_fps": 13.3108175225986,
+      "avg_frame_time_ms": 75.1268656716418,
       "boid_count": 5000,
       "duration": 10.0,
-      "frame_count": 135,
+      "frame_count": 134,
       "implementation": "godot",
-      "max_fps": 13.8888888888889,
-      "max_frame_time_ms": 77.0,
-      "min_fps": 12.987012987013,
-      "min_frame_time_ms": 72.0,
-      "p50_fps": 13.5135135135135,
-      "p95_fps": 13.3333333333333,
-      "p99_fps": 12.987012987013,
-      "timestamp": "2025-08-02T06:41:07"
+      "max_fps": 13.5135135135135,
+      "max_frame_time_ms": 76.0,
+      "min_fps": 13.1578947368421,
+      "min_frame_time_ms": 74.0,
+      "p50_fps": 13.3333333333333,
+      "p95_fps": 13.1578947368421,
+      "p99_fps": 13.1578947368421,
+      "timestamp": "2025-08-02T16:41:49"
     },
     "10000": {
-      "avg_fps": 6.16424736528137,
-      "avg_frame_time_ms": 162.225806451613,
+      "avg_fps": 6.09878024395121,
+      "avg_frame_time_ms": 163.967213114754,
       "boid_count": 10000,
       "duration": 10.0,
-      "frame_count": 62,
+      "frame_count": 61,
       "implementation": "godot",
-      "max_fps": 6.32911392405063,
-      "max_frame_time_ms": 165.0,
-      "min_fps": 6.06060606060606,
-      "min_frame_time_ms": 158.0,
-      "p50_fps": 6.17283950617284,
-      "p95_fps": 6.06060606060606,
-      "p99_fps": 6.06060606060606,
-      "timestamp": "2025-08-02T06:41:48"
+      "max_fps": 6.25,
+      "max_frame_time_ms": 167.0,
+      "min_fps": 5.98802395209581,
+      "min_frame_time_ms": 160.0,
+      "p50_fps": 6.09756097560976,
+      "p95_fps": 6.02409638554217,
+      "p99_fps": 5.98802395209581,
+      "timestamp": "2025-08-02T16:42:30"
     },
     "20000": {
-      "avg_fps": 2.36406619385343,
-      "avg_frame_time_ms": 423.0,
+      "avg_fps": 2.43831073832049,
+      "avg_frame_time_ms": 410.12,
       "boid_count": 20000,
       "duration": 10.0,
-      "frame_count": 24,
+      "frame_count": 25,
       "implementation": "godot",
-      "max_fps": 2.42718446601942,
-      "max_frame_time_ms": 438.0,
-      "min_fps": 2.28310502283105,
-      "min_frame_time_ms": 412.0,
-      "p50_fps": 2.3696682464455,
-      "p95_fps": 2.2883295194508,
-      "p99_fps": 2.28310502283105,
-      "timestamp": "2025-08-02T06:43:31"
+      "max_fps": 2.47524752475248,
+      "max_frame_time_ms": 415.0,
+      "min_fps": 2.40963855421687,
+      "min_frame_time_ms": 404.0,
+      "p50_fps": 2.4330900243309,
+      "p95_fps": 2.40963855421687,
+      "p99_fps": 2.40963855421687,
+      "timestamp": "2025-08-02T16:44:13"
     }
   },
   "bevy": {
     "500": {
       "avg_fps": 144.927536231887,
-      "avg_frame_time_ms": 6.89999999999985,
+      "avg_frame_time_ms": 6.89999999999984,
       "boid_count": 500,
       "duration": 10.0,
       "frame_count": 1450,
@@ -112,7 +112,7 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-08-02T06:40:05"
+      "timestamp": "2025-08-02T16:40:46"
     },
     "1000": {
       "avg_fps": 144.942023190727,
@@ -128,7 +128,7 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 125.0,
-      "timestamp": "2025-08-02T06:40:28"
+      "timestamp": "2025-08-02T16:41:10"
     },
     "2000": {
       "avg_fps": 144.942023190727,
@@ -144,14 +144,14 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 125.0,
-      "timestamp": "2025-08-02T06:40:52"
+      "timestamp": "2025-08-02T16:41:33"
     },
     "5000": {
-      "avg_fps": 110.999999999999,
-      "avg_frame_time_ms": 9.0090090090091,
+      "avg_fps": 108.956417433026,
+      "avg_frame_time_ms": 9.17798165137624,
       "boid_count": 5000,
       "duration": 10.0,
-      "frame_count": 1110,
+      "frame_count": 1090,
       "implementation": "bevy",
       "max_fps": 125.0,
       "max_frame_time_ms": 10.0,
@@ -160,14 +160,14 @@
       "p50_fps": 111.111111111111,
       "p95_fps": 100.0,
       "p99_fps": 100.0,
-      "timestamp": "2025-08-02T06:41:20"
+      "timestamp": "2025-08-02T16:42:01"
     },
     "10000": {
-      "avg_fps": 52.1999999999999,
-      "avg_frame_time_ms": 19.1570881226054,
+      "avg_fps": 52.3738130934532,
+      "avg_frame_time_ms": 19.0935114503817,
       "boid_count": 10000,
       "duration": 10.0,
-      "frame_count": 522,
+      "frame_count": 524,
       "implementation": "bevy",
       "max_fps": 55.5555555555556,
       "max_frame_time_ms": 20.0,
@@ -176,27 +176,27 @@
       "p50_fps": 52.6315789473684,
       "p95_fps": 50.0,
       "p99_fps": 50.0,
-      "timestamp": "2025-08-02T06:42:03"
+      "timestamp": "2025-08-02T16:42:44"
     },
     "20000": {
-      "avg_fps": 25.8612081877185,
-      "avg_frame_time_ms": 38.6679536679536,
+      "avg_fps": 25.7100149476832,
+      "avg_frame_time_ms": 38.8953488372092,
       "boid_count": 20000,
       "duration": 10.0,
-      "frame_count": 259,
+      "frame_count": 258,
       "implementation": "bevy",
       "max_fps": 26.3157894736842,
-      "max_frame_time_ms": 40.0,
-      "min_fps": 25.0,
+      "max_frame_time_ms": 41.0,
+      "min_fps": 24.390243902439,
       "min_frame_time_ms": 38.0,
       "p50_fps": 25.6410256410256,
-      "p95_fps": 25.6410256410256,
-      "p99_fps": 25.6410256410256,
-      "timestamp": "2025-08-02T06:43:53"
+      "p95_fps": 25.0,
+      "p99_fps": 25.0,
+      "timestamp": "2025-08-02T16:44:35"
     }
   },
   "metadata": {
-    "timestamp": "2025-08-02T06:39:43.584586",
+    "timestamp": "2025-08-02T16:40:25.107322",
     "duration": 10.0,
     "boid_counts": [
       500,
@@ -208,8 +208,8 @@
     ]
   },
   "ci_metadata": {
-    "commit": "2cd718ef3ace3fe721b4619afae172da871a11e6",
-    "timestamp": "2025-08-02T06:44:49Z",
+    "commit": "8432f41e0419e17a72b6a6adeef6fa7e4471ee60",
+    "timestamp": "2025-08-02T16:45:18Z",
     "runner": "GitHub Actions"
   }
 }
