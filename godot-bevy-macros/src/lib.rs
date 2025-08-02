@@ -53,9 +53,27 @@ pub fn bevy_app(_attr: TokenStream, item: TokenStream) -> TokenStream {
             fn on_level_init(level: godot::prelude::InitLevel) {
                 if level == godot::prelude::InitLevel::Core {
                     godot::private::class_macros::registry::class::auto_register_classes(level);
+
                     // Stores the client's entrypoint, which we'll call shortly when our `BevyApp`
                     // Godot Node has its `ready()` invoked
                     let _ = godot_bevy::app::BEVY_INIT_FUNC.get_or_init(|| Box::new(#name));
+
+                    #[cfg(feature = "trace_tracy")]
+                    // Start Tracy manually (manual‑lifetime feature enabled)
+                    let _ = &godot_bevy::utils::TRACY_CLIENT;
+                }
+            }
+
+
+            fn on_level_deinit(_level: godot::prelude::InitLevel) {
+                #[cfg(feature = "trace_tracy")]
+                if _level == godot::prelude::InitLevel::Core {
+                    // Explicitly shut Tracy down; required with `manual-lifetime`.
+                    unsafe {
+                        tracing_tracy::client::sys::___tracy_shutdown_profiler();
+                    }
+                    // TRACY_CLIENT stays filled, but the library is about to be unloaded,
+                    // so its memory will disappear immediately afterwards.
                 }
             }
         }

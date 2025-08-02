@@ -112,6 +112,12 @@ impl INode for BevyApp {
             if let Err(e) = catch_unwind(AssertUnwindSafe(|| {
                 // Run the full Bevy update cycle - much simpler!
                 app.update();
+
+                #[cfg(feature = "trace_tracy")]
+                // Indicate that rendering of a continuous frame has ended.
+                tracing_tracy::client::Client::running()
+                    .expect("client must be running")
+                    .frame_mark();
             })) {
                 self.app = None;
 
@@ -136,6 +142,12 @@ impl INode for BevyApp {
                 // Run only our physics-specific schedule
                 app.world_mut().run_schedule(PrePhysicsUpdate);
                 app.world_mut().run_schedule(PhysicsUpdate);
+
+                #[cfg(feature = "trace_tracy")]
+                // Indicate that a physics frame has ended.
+                tracing_tracy::client::Client::running()
+                    .expect("client must be running")
+                    .secondary_frame_mark(tracing_tracy::client::frame_name!("physics"));
             })) {
                 self.app = None;
 
