@@ -17,7 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-BevyAppSingleton="*res://scenes/bevy_app_singleton.tscn"
+BevyAppSingleton="*res://bevy_app_singleton.tscn"
 BenchmarkCLI="*res://scenes/benchmark_cli.tscn"
 
 [display]
@@ -25,6 +25,10 @@ BenchmarkCLI="*res://scenes/benchmark_cli.tscn"
 window/size/viewport_width=1920
 window/size/viewport_height=1400
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot-bevy/plugin.cfg")
 
 [input]
 

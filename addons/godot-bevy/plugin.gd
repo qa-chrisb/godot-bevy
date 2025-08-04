@@ -51,11 +51,37 @@ func _on_add_singleton():
 	else:
 		push_warning("BevyAppSingleton added to project autoload settings! Restart editor to apply changes.")
 
+
 func _create_bevy_app_singleton(path: String):
-	# Create the scene file content directly
-	var scene_content = """[gd_scene format=3 uid="uid://bjsfwt816j4tp"]
+	# Create the scene file content with bulk transform optimization methods
+	var scene_content = """[gd_scene load_steps=2 format=3 uid="uid://bjsfwt816j4tp"]
+
+[sub_resource type="GDScript" id="GDScript_1"]
+script/source = "extends BevyApp
+
+
+# Bulk Transform Optimization Methods
+# Automatically detected by godot-bevy library for performance optimization
+
+func bulk_update_transforms_3d(instance_ids: PackedInt64Array, positions: PackedVector3Array, rotations: PackedVector3Array, scales: PackedVector3Array):
+	for i in range(instance_ids.size()):
+		var node = instance_from_id(instance_ids[i]) as Node3D
+		# Trust instance IDs are valid
+		node.position = positions[i]
+		node.rotation = rotations[i]
+		node.scale = scales[i]
+
+func bulk_update_transforms_2d(instance_ids: PackedInt64Array, positions: PackedVector2Array, rotations: PackedFloat32Array, scales: PackedVector2Array):
+	for i in range(instance_ids.size()):
+		var node = instance_from_id(instance_ids[i]) as Node2D
+		# Trust instance IDs are valid
+		node.position = positions[i]
+		node.rotation = rotations[i]
+		node.scale = scales[i]
+"
 
 [node name="BevyApp" type="BevyApp"]
+script = SubResource("GDScript_1")
 """
 
 	# Save the scene file directly
@@ -68,7 +94,7 @@ func _on_project_created(project_info: Dictionary):
 	_scaffold_rust_project(project_info)
 	_create_bevy_app_singleton("res://bevy_app_singleton.tscn")
 	_on_add_singleton()  # This will add it to autoload
-
+	
 	# Automatically build the Rust project and restart after
 	var is_release = project_info.get("release_build", false)
 	_should_restart_after_build = true
