@@ -1,19 +1,10 @@
+use super::attr::{GodotNodeAttrArgs, KeyValue};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{ToTokens, format_ident, quote, quote_spanned};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{Data, DeriveInput, Meta, Token, parse_quote, parse2};
-
-struct KeyValue {
-    key: syn::Ident,
-    value: syn::Expr,
-}
-
-struct GodotNodeAttrArgs {
-    base: Option<syn::Ident>,
-    class_name: Option<syn::Ident>,
-}
 
 #[derive(Clone)]
 struct GodotExportAttrArgs {
@@ -27,46 +18,6 @@ struct ComponentField {
     name: syn::Ident,
     field_type: syn::Type,
     export_attribute: Option<GodotExportAttrArgs>,
-}
-
-impl Parse for KeyValue {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let name: syn::Ident = input.parse()?;
-        let content;
-        syn::parenthesized!(content in input);
-        let value: syn::Expr = content.parse()?;
-        Ok(KeyValue { key: name, value })
-    }
-}
-
-/// Parses the following format:
-/// ```ignore
-/// base(<godot_type>), class_name(<identifier>)
-/// ```
-impl Parse for GodotNodeAttrArgs {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let arguments = Punctuated::<KeyValue, Token![,]>::parse_terminated(input)?;
-        let mut base = None;
-        let mut class_name = None;
-
-        for argument in arguments {
-            if argument.key == "base" {
-                base = Some(parse2::<syn::Ident>(argument.value.to_token_stream())?);
-            } else if argument.key == "class_name" {
-                class_name = Some(parse2::<syn::Ident>(argument.value.to_token_stream())?);
-            } else {
-                return Err(syn::Error::new(
-                    argument.key.span(),
-                    format!(
-                        "Unknown parameter: `{}`. Expected `base` or `class_name`.",
-                        argument.key
-                    ),
-                ));
-            }
-        }
-
-        Ok(GodotNodeAttrArgs { base, class_name })
-    }
 }
 
 /// Parses the following format:
