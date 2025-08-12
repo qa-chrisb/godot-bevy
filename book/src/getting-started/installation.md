@@ -97,7 +97,7 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-godot-bevy = "0.8.4"
+godot-bevy = "0.9.0"
 bevy = { version = "0.16", default-features = false }
 godot = "0.3"
 ```

@@ -2191,7 +2191,7 @@ dependencies = [
 
 [[package]]
 name = "godot-bevy"
-version = "0.8.4"
+version = "0.9.0"
 dependencies = [
  "bevy",
  "chrono",
@@ -2210,7 +2210,7 @@ dependencies = [
 
 [[package]]
 name = "godot-bevy-macros"
-version = "0.8.4"
+version = "0.9.0"
 dependencies = [
  "proc-macro2",
  "quote",
