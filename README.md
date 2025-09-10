@@ -136,7 +136,7 @@ This library was inspired by and originally built upon the work of [bevy_godot](
 
 ## 🦀 MSRV
 
-The minimum supported Rust version is 1.87.0.
+The minimum supported Rust version is 1.88.0.
 
 The MSRV is the minimum Rust version that can be used to compile each crate.
 
