@@ -6,7 +6,7 @@ This guide will walk you through setting up godot-bevy in a Godot project.
 
 Before you begin, ensure you have:
 
-- **Rust 1.87.0 or later** - [Install Rust](https://rustup.rs/)
+- **Rust 1.88.0 or later** - [Install Rust](https://rustup.rs/)
 - **Godot 4.3** - [Download Godot](https://godotengine.org/download)
 - Basic familiarity with both Rust and Godot
 

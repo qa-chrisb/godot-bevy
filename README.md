@@ -5,7 +5,7 @@
 [![Documentation](https://img.shields.io/badge/docs-latest-blue)](https://docs.rs/godot-bevy/latest/godot_bevy/)
 [![Book](https://img.shields.io/badge/book-read-green)](https://bytemeadow.github.io/godot-bevy)
 [![Test Status](https://github.com/bytemeadow/godot-bevy/actions/workflows/ci.yml/badge.svg)](https://github.com/bytemeadow/godot-bevy/actions/workflows/ci.yml)
-[![Rust Version](https://img.shields.io/badge/Rust-1.87.0+-blue)](https://releases.rs/docs/1.87.0)
+[![Rust Version](https://img.shields.io/badge/Rust-1.88.0+-blue)](https://releases.rs/docs/1.88.0)
 ![license](https://shields.io/badge/license-MIT%2FApache--2.0-blue)
 
 **godot-bevy** brings Bevy's powerful ECS to Godot, allowing you to write high-performance game logic in Rust while leveraging Godot's excellent editor and rendering capabilities.
