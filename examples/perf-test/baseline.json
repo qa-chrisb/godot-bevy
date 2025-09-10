@@ -1,8 +1,8 @@
 {
   "godot": {
     "500": {
-      "avg_fps": 144.927536231887,
-      "avg_frame_time_ms": 6.89999999999984,
+      "avg_fps": 144.971005798843,
+      "avg_frame_time_ms": 6.89793103448261,
       "duration": 10.0,
       "entity_count": 500,
       "frame_count": 1450,
@@ -14,7 +14,7 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:34:41"
+      "timestamp": "2025-09-10T20:09:20"
     },
     "1000": {
       "avg_fps": 144.927536231887,
@@ -30,11 +30,11 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:35:05"
+      "timestamp": "2025-09-10T20:09:44"
     },
     "2000": {
-      "avg_fps": 144.927536231887,
-      "avg_frame_time_ms": 6.89999999999984,
+      "avg_fps": 144.942023190727,
+      "avg_frame_time_ms": 6.89931034482743,
       "duration": 10.0,
       "entity_count": 2000,
       "frame_count": 1450,
@@ -46,7 +46,7 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:35:28"
+      "timestamp": "2025-09-10T20:10:07"
     },
     "5000": {
       "avg_fps": 144.927536231887,
@@ -62,39 +62,39 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:35:52"
+      "timestamp": "2025-09-10T20:10:31"
     },
     "10000": {
-      "avg_fps": 144.942023190727,
-      "avg_frame_time_ms": 6.89931034482743,
+      "avg_fps": 145.027486256875,
+      "avg_frame_time_ms": 6.89524465885581,
       "duration": 10.0,
       "entity_count": 10000,
-      "frame_count": 1450,
+      "frame_count": 1451,
       "implementation": "godot",
-      "max_fps": 166.666666666667,
+      "max_fps": 200.0,
       "max_frame_time_ms": 7.0,
       "min_fps": 142.857142857143,
-      "min_frame_time_ms": 6.0,
+      "min_frame_time_ms": 5.0,
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:36:17"
+      "timestamp": "2025-09-10T20:10:56"
     },
     "20000": {
-      "avg_fps": 117.84107946027,
-      "avg_frame_time_ms": 8.4860050890585,
+      "avg_fps": 99.6302588188282,
+      "avg_frame_time_ms": 10.0371113340019,
       "duration": 10.0,
       "entity_count": 20000,
-      "frame_count": 1179,
+      "frame_count": 997,
       "implementation": "godot",
-      "max_fps": 142.857142857143,
-      "max_frame_time_ms": 10.0,
-      "min_fps": 100.0,
-      "min_frame_time_ms": 7.0,
-      "p50_fps": 125.0,
-      "p95_fps": 111.111111111111,
-      "p99_fps": 100.0,
-      "timestamp": "2025-09-08T20:36:48"
+      "max_fps": 111.111111111111,
+      "max_frame_time_ms": 12.0,
+      "min_fps": 83.3333333333333,
+      "min_frame_time_ms": 9.0,
+      "p50_fps": 100.0,
+      "p95_fps": 90.9090909090909,
+      "p99_fps": 90.9090909090909,
+      "timestamp": "2025-09-10T20:11:27"
     }
   },
   "bevy": {
@@ -112,7 +112,7 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:34:53"
+      "timestamp": "2025-09-10T20:09:32"
     },
     "1000": {
       "avg_fps": 144.927536231887,
@@ -128,7 +128,7 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:35:16"
+      "timestamp": "2025-09-10T20:09:55"
     },
     "2000": {
       "avg_fps": 144.927536231887,
@@ -144,11 +144,11 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:35:40"
+      "timestamp": "2025-09-10T20:10:19"
     },
     "5000": {
-      "avg_fps": 144.942023190727,
-      "avg_frame_time_ms": 6.89931034482743,
+      "avg_fps": 144.927536231887,
+      "avg_frame_time_ms": 6.89999999999984,
       "duration": 10.0,
       "entity_count": 5000,
       "frame_count": 1450,
@@ -160,30 +160,30 @@
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:36:03"
+      "timestamp": "2025-09-10T20:10:42"
     },
     "10000": {
-      "avg_fps": 145.203284598441,
-      "avg_frame_time_ms": 6.88689655172399,
+      "avg_fps": 144.971005798843,
+      "avg_frame_time_ms": 6.8979310344826,
       "duration": 10.0,
       "entity_count": 10000,
       "frame_count": 1450,
       "implementation": "bevy",
-      "max_fps": 200.0,
+      "max_fps": 250.0,
       "max_frame_time_ms": 7.0,
       "min_fps": 142.857142857143,
-      "min_frame_time_ms": 5.0,
+      "min_frame_time_ms": 4.0,
       "p50_fps": 142.857142857143,
       "p95_fps": 142.857142857143,
       "p99_fps": 142.857142857143,
-      "timestamp": "2025-09-08T20:36:29"
+      "timestamp": "2025-09-10T20:11:08"
     },
     "20000": {
-      "avg_fps": 131.847261095563,
-      "avg_frame_time_ms": 7.58453373767999,
+      "avg_fps": 130.800000000002,
+      "avg_frame_time_ms": 7.6452599388378,
       "duration": 10.0,
       "entity_count": 20000,
-      "frame_count": 1319,
+      "frame_count": 1308,
       "implementation": "bevy",
       "max_fps": 166.666666666667,
       "max_frame_time_ms": 10.0,
@@ -191,12 +191,12 @@
       "min_frame_time_ms": 6.0,
       "p50_fps": 142.857142857143,
       "p95_fps": 111.111111111111,
-      "p99_fps": 111.111111111111,
-      "timestamp": "2025-09-08T20:37:02"
+      "p99_fps": 100.0,
+      "timestamp": "2025-09-10T20:11:41"
     }
   },
   "metadata": {
-    "timestamp": "2025-09-08T20:34:31.783006",
+    "timestamp": "2025-09-10T20:09:10.670213",
     "duration": 10.0,
     "entity_counts": [
       500,
@@ -208,8 +208,8 @@
     ]
   },
   "ci_metadata": {
-    "commit": "e8f8cae705f1463a43621131e9e007f46a4f82ae",
-    "timestamp": "2025-09-08T20:37:44Z",
+    "commit": "04aeee0f4ba549a521eae5f1a0b0d4aecc80dcec",
+    "timestamp": "2025-09-10T20:12:26Z",
     "runner": "GitHub Actions"
   }
 }
