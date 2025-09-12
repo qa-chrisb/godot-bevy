@@ -10,7 +10,8 @@ use bevy::{
 use godot::{
     classes::{
         InputEvent as GodotInputEvent, InputEventJoypadButton, InputEventJoypadMotion,
-        InputEventKey, InputEventMouseButton, InputEventMouseMotion, InputEventScreenTouch,
+        InputEventKey, InputEventMouseButton, InputEventMouseMotion, InputEventPanGesture,
+        InputEventScreenTouch,
     },
     global::Key,
     obj::{EngineEnum, Gd},
@@ -39,7 +40,8 @@ impl Plugin for GodotInputEventPlugin {
             .add_event::<TouchInput>()
             .add_event::<ActionInput>()
             .add_event::<GamepadButtonInput>()
-            .add_event::<GamepadAxisInput>();
+            .add_event::<GamepadAxisInput>()
+            .add_event::<PanGestureInput>();
     }
 }
 
@@ -101,6 +103,12 @@ pub struct GamepadAxisInput {
     pub value: f32,
 }
 
+/// Two-finger pan gesture input event (from Godot InputEventPanGesture)
+#[derive(Debug, Event, Clone)]
+pub struct PanGestureInput {
+    pub delta: Vec2,
+}
+
 /// Mouse button types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MouseButton {
@@ -142,6 +150,7 @@ fn write_input_events(
     mut action_events: EventWriter<ActionInput>,
     mut gamepad_button_events: EventWriter<GamepadButtonInput>,
     mut gamepad_axis_events: EventWriter<GamepadAxisInput>,
+    mut pan_gesture_events: EventWriter<PanGestureInput>,
 ) {
     for (event_type, input_event) in events.0.try_iter() {
         trace!("Processing {:?} input event", event_type);
@@ -161,6 +170,7 @@ fn write_input_events(
                     &mut touch_events,
                     &mut gamepad_button_events,
                     &mut gamepad_axis_events,
+                    &mut pan_gesture_events,
                 );
             }
         }
@@ -184,6 +194,7 @@ fn extract_input_events_no_actions(
     touch_events: &mut EventWriter<TouchInput>,
     gamepad_button_events: &mut EventWriter<GamepadButtonInput>,
     gamepad_axis_events: &mut EventWriter<GamepadAxisInput>,
+    pan_gesture_events: &mut EventWriter<PanGestureInput>,
 ) {
     extract_basic_input_events(
         input_event,
@@ -193,6 +204,7 @@ fn extract_input_events_no_actions(
         touch_events,
         gamepad_button_events,
         gamepad_axis_events,
+        pan_gesture_events,
     );
 }
 
@@ -204,6 +216,7 @@ fn extract_basic_input_events(
     touch_events: &mut EventWriter<TouchInput>,
     gamepad_button_events: &mut EventWriter<GamepadButtonInput>,
     gamepad_axis_events: &mut EventWriter<GamepadAxisInput>,
+    pan_gesture_events: &mut EventWriter<PanGestureInput>,
 ) {
     // Try to cast to specific input event types and extract data
 
@@ -263,6 +276,13 @@ fn extract_basic_input_events(
             device: gamepad_motion_event.get_device(),
             axis: gamepad_motion_event.get_axis().ord(),
             value: gamepad_motion_event.get_axis_value(),
+        });
+    }
+    // Two-finger pan gesture
+    else if let Ok(pan_gesture_event) = input_event.clone().try_cast::<InputEventPanGesture>() {
+        let delta = pan_gesture_event.get_delta();
+        pan_gesture_events.write(PanGestureInput {
+            delta: Vec2::new(delta.x, delta.y),
         });
     }
 }

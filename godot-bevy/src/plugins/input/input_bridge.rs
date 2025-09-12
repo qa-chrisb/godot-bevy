@@ -7,6 +7,7 @@ use bevy::{
     },
     input::{
         ButtonInput, ButtonState, InputPlugin,
+        gestures::PanGesture as BevyPanGesture,
         keyboard::KeyCode,
         mouse::{
             MouseButton as BevyMouseButton, MouseButtonInput as BevyMouseButtonInput,
@@ -18,6 +19,7 @@ use bevy::{
 use crate::plugins::input::events::{
     KeyboardInput as GodotKeyboardInput, MouseButton as GodotMouseButton,
     MouseButtonInput as GodotMouseButtonInput, MouseMotion as GodotMouseMotion,
+    PanGestureInput as GodotPanGestureInput,
 };
 
 /// Plugin that bridges godot-bevy's input events to Bevy's standard input resources.
@@ -37,6 +39,7 @@ impl Plugin for BevyInputBridgePlugin {
                     bridge_mouse_button_input,
                     bridge_mouse_motion,
                     bridge_mouse_scroll,
+                    bridge_pan_gesture,
                 ),
             )
             .add_systems(Last, clear_keyboard_input);
@@ -140,6 +143,15 @@ fn bridge_mouse_scroll(
             }
             _ => {} // Ignore non-wheel buttons
         }
+    }
+}
+
+fn bridge_pan_gesture(
+    mut pan_events: EventReader<GodotPanGestureInput>,
+    mut bevy_pan_events: EventWriter<BevyPanGesture>,
+) {
+    for event in pan_events.read() {
+        bevy_pan_events.write(BevyPanGesture(event.delta));
     }
 }
 
