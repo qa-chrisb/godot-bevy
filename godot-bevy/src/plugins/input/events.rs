@@ -293,7 +293,6 @@ fn check_action_events(
     input_event: &Gd<GodotInputEvent>,
     action_events: &mut EventWriter<ActionInput>,
 ) {
-    use godot::builtin::StringName;
     use godot::classes::InputMap;
 
     // Get all actions from the InputMap
@@ -301,24 +300,22 @@ fn check_action_events(
     let actions = input_map.get_actions();
 
     // Check each action to see if this input event matches it
-    for action_variant in actions.iter_shared() {
-        let action_name = action_variant.to_string();
-        let action_string_name: StringName = action_name.as_str().into();
+    for action_name in actions.iter_shared() {
+        if input_event.is_action(&action_name) {
+            let pressed = input_event.is_action_pressed(&action_name);
+            let strength = input_event.get_action_strength(&action_name);
 
-        // Check if this input event matches the action
-        if input_event.is_action(&action_string_name) {
-            let pressed = input_event.is_action_pressed(&action_string_name);
-            let strength = input_event.get_action_strength(&action_string_name);
+            let action_str = action_name.to_string();
 
             trace!(
                 "Generated ActionInput: '{}' {} (strength: {:.2})",
-                action_name,
+                action_str,
                 if pressed { "pressed" } else { "released" },
                 strength
             );
 
             action_events.write(ActionInput {
-                action: action_name,
+                action: action_str,
                 pressed,
                 strength,
             });
