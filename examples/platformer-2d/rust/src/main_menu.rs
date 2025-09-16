@@ -2,6 +2,7 @@ use crate::{
     GameState,
     level_manager::{LevelId, LoadLevelEvent},
 };
+use bevy::prelude::Event;
 use bevy::{
     app::prelude::*,
     ecs::{
@@ -16,7 +17,7 @@ use bevy::{
         state::{NextState, OnEnter},
     },
 };
-use godot::classes::{Button, DisplayServer, Node, display_server::WindowMode};
+use godot::classes::{Button, DisplayServer, display_server::WindowMode};
 use godot_bevy::prelude::*;
 
 #[derive(Resource, Default)]
@@ -32,6 +33,10 @@ pub struct MainMenuPlugin;
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MenuAssets>()
+            // Enable typed signal routing for our menu events
+            .add_plugins(GodotTypedSignalsPlugin::<StartGameRequested>::default())
+            .add_plugins(GodotTypedSignalsPlugin::<ToggleFullscreenRequested>::default())
+            .add_plugins(GodotTypedSignalsPlugin::<QuitRequested>::default())
             .add_systems(OnEnter(GameState::MainMenu), reset_menu_assets)
             .add_systems(
                 Update,
@@ -99,7 +104,25 @@ fn menu_is_initialized(menu_assets: Res<MenuAssets>) -> bool {
     menu_assets.initialized
 }
 
-fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, signals: GodotSignals) {
+// Typed events for menu actions
+#[derive(Event, Debug, Clone)]
+struct StartGameRequested;
+
+#[derive(Event, Debug, Clone)]
+struct ToggleFullscreenRequested;
+
+#[derive(Event, Debug, Clone)]
+struct QuitRequested {
+    source: GodotNodeHandle,
+}
+
+fn connect_buttons(
+    mut menu_assets: ResMut<MenuAssets>,
+    // Typed bridges for precise events
+    typed_start: TypedGodotSignals<StartGameRequested>,
+    typed_fullscreen: TypedGodotSignals<ToggleFullscreenRequested>,
+    typed_quit: TypedGodotSignals<QuitRequested>,
+) {
     // Check if all buttons are available first
     if menu_assets.start_button.is_some()
         && menu_assets.fullscreen_button.is_some()
@@ -108,13 +131,21 @@ fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, signals: GodotSignals) {
     {
         // Get mutable references one at a time to avoid multiple borrows
         if let Some(start_btn) = menu_assets.start_button.as_mut() {
-            signals.connect(start_btn, "pressed");
+            typed_start.connect_map(start_btn, "pressed", None, |_args, _node, _ent| {
+                StartGameRequested
+            });
         }
         if let Some(fullscreen_btn) = menu_assets.fullscreen_button.as_mut() {
-            signals.connect(fullscreen_btn, "pressed");
+            typed_fullscreen.connect_map(fullscreen_btn, "pressed", None, |_args, _node, _ent| {
+                ToggleFullscreenRequested
+            });
         }
         if let Some(quit_btn) = menu_assets.quit_button.as_mut() {
-            signals.connect(quit_btn, "pressed");
+            typed_quit.connect_map(quit_btn, "pressed", None, |_args, node, _ent| {
+                QuitRequested {
+                    source: node.clone(),
+                }
+            });
         }
 
         menu_assets.signals_connected = true;
@@ -124,51 +155,36 @@ fn connect_buttons(mut menu_assets: ResMut<MenuAssets>, signals: GodotSignals) {
 
 #[main_thread_system]
 fn listen_for_button_press(
-    menu_assets: Res<MenuAssets>,
-    mut events: EventReader<GodotSignal>,
+    _menu_assets: Res<MenuAssets>,
+    mut start_ev: EventReader<StartGameRequested>,
+    mut toggle_ev: EventReader<ToggleFullscreenRequested>,
+    mut quit_ev: EventReader<QuitRequested>,
     mut app_state: ResMut<NextState<GameState>>,
     mut level_load_events: EventWriter<LoadLevelEvent>,
 ) {
-    for evt in events.read() {
-        // Skip events for freed nodes - check if target node still exists
-        if evt.target.clone().try_get::<Node>().is_none() {
-            continue;
+    for _ in start_ev.read() {
+        println!("Start button pressed (typed)");
+        app_state.set(GameState::InGame);
+        level_load_events.write(LoadLevelEvent {
+            level_id: LevelId::Level1,
+        });
+    }
+
+    for _ in toggle_ev.read() {
+        println!("Fullscreen button pressed (typed)");
+        if DisplayServer::singleton().window_get_mode() == WindowMode::FULLSCREEN {
+            DisplayServer::singleton().window_set_mode(WindowMode::WINDOWED);
+        } else if DisplayServer::singleton().window_get_mode() == WindowMode::WINDOWED {
+            DisplayServer::singleton().window_set_mode(WindowMode::FULLSCREEN);
         }
+    }
 
-        if evt.name == "pressed" {
-            if let Some(start_button) = &menu_assets.start_button
-                && &evt.target == start_button
-            {
-                println!("Start button pressed");
-                app_state.set(GameState::InGame);
-                level_load_events.write(LoadLevelEvent {
-                    level_id: LevelId::Level1,
-                });
-                continue;
-            }
-
-            if let Some(fullscreen_button) = &menu_assets.fullscreen_button
-                && &evt.target == fullscreen_button
-            {
-                println!("Fullscreen button pressed");
-                if DisplayServer::singleton().window_get_mode() == WindowMode::FULLSCREEN {
-                    DisplayServer::singleton().window_set_mode(WindowMode::WINDOWED);
-                } else if DisplayServer::singleton().window_get_mode() == WindowMode::WINDOWED {
-                    DisplayServer::singleton().window_set_mode(WindowMode::FULLSCREEN);
-                }
-                continue;
-            }
-
-            if let Some(quit_button) = &menu_assets.quit_button
-                && &evt.target == quit_button
-            {
-                println!("Quit button pressed");
-                if let Some(button) = evt.target.clone().try_get::<Button>()
-                    && let Some(mut tree) = button.get_tree()
-                {
-                    tree.quit();
-                }
-            }
+    for ev in quit_ev.read() {
+        println!("Quit button pressed (typed)");
+        if let Some(button) = ev.source.clone().try_get::<Button>()
+            && let Some(mut tree) = button.get_tree()
+        {
+            tree.quit();
         }
     }
 }
