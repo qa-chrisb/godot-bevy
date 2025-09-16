@@ -186,6 +186,7 @@ fn extract_action_events_only(
     check_action_events(&input_event, action_events);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn extract_input_events_no_actions(
     input_event: Gd<GodotInputEvent>,
     keyboard_events: &mut EventWriter<KeyboardInput>,
@@ -208,6 +209,7 @@ fn extract_input_events_no_actions(
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn extract_basic_input_events(
     input_event: Gd<GodotInputEvent>,
     keyboard_events: &mut EventWriter<KeyboardInput>,

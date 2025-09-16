@@ -53,13 +53,15 @@ fn gamepad_system(gamepads: Query<(Entity, &Gamepad)>) {
             godot_print!("[BEVY] {} just released South", entity);
         }
 
-        let right_trigger = gamepad.get(GamepadButton::RightTrigger2).unwrap();
-        if right_trigger.abs() > 0.01 {
+        if let Some(right_trigger) = gamepad.get(GamepadButton::RightTrigger2)
+            && right_trigger.abs() > 0.01
+        {
             godot_print!("[BEVY] {} RightTrigger2 value is {}", entity, right_trigger);
         }
 
-        let left_stick_x = gamepad.get(GamepadAxis::LeftStickX).unwrap();
-        if left_stick_x.abs() > 0.01 {
+        if let Some(left_stick_x) = gamepad.get(GamepadAxis::LeftStickX)
+            && left_stick_x.abs() > 0.01
+        {
             godot_print!("[BEVY] {} LeftStickX value is {}", entity, left_stick_x);
         }
     }

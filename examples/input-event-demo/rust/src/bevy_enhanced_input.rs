@@ -19,14 +19,15 @@ fn init_input(mut commands: Commands) {
 }
 
 fn bind(trigger: Trigger<Bind<Player>>, mut players: Query<&mut Actions<Player>>) {
-    let mut actions = players.get_mut(trigger.target()).unwrap();
-    actions
-        .bind::<Move>()
-        .to((Cardinal::wasd_keys(), Axial::left_stick()))
-        .with_modifiers(DeadZone::default());
-    actions
-        .bind::<Interact>()
-        .to((KeyCode::KeyE, GamepadButton::South));
+    if let Ok(mut actions) = players.get_mut(trigger.target()) {
+        actions
+            .bind::<Move>()
+            .to((Cardinal::wasd_keys(), Axial::left_stick()))
+            .with_modifiers(DeadZone::default());
+        actions
+            .bind::<Interact>()
+            .to((KeyCode::KeyE, GamepadButton::South));
+    }
 }
 
 fn apply_move(trigger: Trigger<Fired<Move>>) {

@@ -68,12 +68,14 @@ fn bridge_mouse_button_input(
 ) {
     for event in mouse_events.read() {
         // Skip wheel events - they're handled separately in bridge_mouse_scroll
-        match event.button {
+        if matches!(
+            event.button,
             GodotMouseButton::WheelUp
-            | GodotMouseButton::WheelDown
-            | GodotMouseButton::WheelLeft
-            | GodotMouseButton::WheelRight => continue,
-            _ => {}
+                | GodotMouseButton::WheelDown
+                | GodotMouseButton::WheelLeft
+                | GodotMouseButton::WheelRight
+        ) {
+            continue;
         }
 
         let bevy_button = godot_mouse_to_bevy_mouse(event.button);
