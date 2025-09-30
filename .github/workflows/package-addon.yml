@@ -1,0 +1,47 @@
+name: Package Addon
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'addons/godot-bevy/**'
+      - '.github/workflows/package-addon.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-addon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify addon folder
+        run: test -d addons/godot-bevy
+      
+      - name: Read addon version from plugin.cfg
+        id: version
+        shell: bash
+        run: |
+          path=addons/godot-bevy/plugin.cfg
+          [[ -f "$path" ]] || { echo "Missing $path" >&2; exit 1; }
+
+          # Extract version="..."
+          raw=$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*"\([^"]*\)".*$/\1/p' "$path")
+
+          [[ -n "$raw" ]] || { echo 'version="..." not found in plugin.cfg' >&2; exit 1; }
+
+          safe=$(printf '%s' "$raw" | tr -c '0-9A-Za-z._-' '-')
+
+          echo "raw=$raw"   >> "$GITHUB_OUTPUT"
+          echo "safe=$safe" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-bevy-${{ steps.version.outputs.safe }}
+          path: addons/godot-bevy
+          if-no-files-found: error
+          retention-days: 14
