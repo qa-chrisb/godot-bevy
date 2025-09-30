@@ -23,10 +23,25 @@ The easiest way to get started is using the godot-bevy editor plugin, which auto
 
 ### 1. Install the Plugin
 
-1. Download the `addons/godot-bevy` folder from the [godot-bevy repository](https://github.com/bytemeadow/godot-bevy)
-2. Copy it to your Godot project's `addons/` directory
-3. In Godot, go to **Project > Project Settings > Plugins**
-4. Enable the "Godot-Bevy Integration" plugin
+There are two ways of getting the addon (choose one):
+
+- **Download from this repository**  
+  Download or clone the [godot-bevy repository](https://github.com/bytemeadow/godot-bevy).
+  Copy the `addons/godot-bevy` folder into your Godot project.
+
+- **Download a packaged artifact**  
+  Go to the [Actions](https://github.com/bytemeadow/godot-bevy/actions) page of this repository,  
+  select the workflow run for the commit or version you want, and download the artifact (e.g. `godot-bevy-0.9.1`).  
+  Extract it into your project’s `addons/` directory.
+
+---
+
+### Enabling the plugin
+
+After copying the addon into your project (by either method):
+
+1. In Godot, go to **Project > Project Settings > Plugins**  
+2. Enable the **Godot-Bevy Integration** plugin
 
 ### 2. Create Your Project
 
